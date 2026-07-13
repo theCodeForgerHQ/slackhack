@@ -14,18 +14,51 @@ function isMissingScope(err: unknown): boolean {
   return /missing_scope|not_allowed_token_type/i.test(msg);
 }
 
+async function uploadMarkdownFallback(
+  client: WebClient,
+  channelId: string,
+  threadTs: string | undefined,
+  doc: CanvasDocument,
+  fallbackComment?: string,
+): Promise<CanvasCreateResult> {
+  const md = canvasToMarkdown(doc);
+  const uploadBase = {
+    channel_id: channelId,
+    filename: 'questionnaire-asked-and-answered.md',
+    file: Buffer.from(md, 'utf8'),
+    initial_comment:
+      fallbackComment ??
+      'Canvas export (Markdown fallback — native Canvas API unavailable). Every answer cited and approval-logged.',
+  };
+  if (threadTs) {
+    await client.files.uploadV2({ ...uploadBase, thread_ts: threadTs } as never);
+  } else {
+    await client.files.uploadV2(uploadBase as never);
+  }
+  return {
+    kind: 'markdown_fallback',
+    message: ':page_with_curl: Audit artifact exported as Markdown (native Canvas API unavailable).',
+  };
+}
+
 /**
  * Create a native Slack Canvas when the bot has `canvases:write`.
  * Falls back to Markdown upload only for transient API errors — not for
  * missing scope, so judges can see when the workspace needs a reinstall.
+ *
+ * `forceFallback` skips the native Canvas attempt entirely; it is used when
+ * the startup capability probe has already determined Canvas is unavailable.
  */
 export async function createCanvasOrFallback(
   client: WebClient,
   channelId: string,
   threadTs: string | undefined,
   doc: CanvasDocument,
-  opts: { teamId?: string; fallbackComment?: string } = {},
+  opts: { teamId?: string; fallbackComment?: string; forceFallback?: boolean } = {},
 ): Promise<CanvasCreateResult> {
+  if (opts.forceFallback) {
+    return uploadMarkdownFallback(client, channelId, threadTs, doc, opts.fallbackComment);
+  }
   try {
     const canvas = await client.canvases.create({
       title: doc.title,
@@ -49,38 +82,8 @@ export async function createCanvasOrFallback(
           ':warning: Canvas export needs the `canvases:write` bot scope. Reinstall the app from the updated manifest, then retry Export Canvas.',
       };
     }
-    // Transient / format errors: fall back to Markdown file upload.
-    const md = canvasToMarkdown(doc);
-    const uploadBase = {
-      channel_id: channelId,
-      filename: 'questionnaire-asked-and-answered.md',
-      file: Buffer.from(md, 'utf8'),
-      initial_comment:
-        opts.fallbackComment ??
-        'Canvas export (Markdown fallback — native Canvas API unavailable). Every answer cited and approval-logged.',
-    };
-    if (threadTs) {
-      await client.files.uploadV2({ ...uploadBase, thread_ts: threadTs } as never);
-    } else {
-      await client.files.uploadV2(uploadBase as never);
-    }
-    return {
-      kind: 'markdown_fallback',
-      message: ':page_with_curl: Audit artifact exported as Markdown (native Canvas API unavailable).',
-    };
+    return uploadMarkdownFallback(client, channelId, threadTs, doc, opts.fallbackComment);
   }
 
-  const md = canvasToMarkdown(doc);
-  const uploadBase = {
-    channel_id: channelId,
-    filename: 'questionnaire-asked-and-answered.md',
-    file: Buffer.from(md, 'utf8'),
-    initial_comment: opts.fallbackComment ?? 'Canvas export (Markdown fallback).',
-  };
-  if (threadTs) {
-    await client.files.uploadV2({ ...uploadBase, thread_ts: threadTs } as never);
-  } else {
-    await client.files.uploadV2(uploadBase as never);
-  }
-  return { kind: 'markdown_fallback', message: ':page_with_curl: Audit artifact exported as Markdown.' };
+  return uploadMarkdownFallback(client, channelId, threadTs, doc, opts.fallbackComment);
 }

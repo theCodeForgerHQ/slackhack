@@ -150,6 +150,33 @@ export class EvidenceGraph {
     return [...(this.edges.get(id) ?? [])];
   }
 
+  /** Return all edges whose `to` equals `id` (incoming edges). */
+  edgesTo(id: string): Edge[] {
+    const out: Edge[] = [];
+    for (const list of this.edges.values()) {
+      for (const e of list) {
+        if (e.to === id) out.push(e);
+      }
+    }
+    return out;
+  }
+
+  /** Deterministic, cheap signature of the current workspace evidence state.
+   *  Based on evidence/claim counts so new observed evidence invalidates
+   *  downstream search caches.
+   */
+  stateSignature(): string {
+    let evidenceCount = 0;
+    let claimCount = 0;
+    let edgeCount = 0;
+    for (const n of this.nodes.values()) {
+      if (n.kind === 'evidence') evidenceCount++;
+      else if (n.kind === 'claim') claimCount++;
+    }
+    for (const list of this.edges.values()) edgeCount += list.length;
+    return `${evidenceCount}:${claimCount}:${edgeCount}`;
+  }
+
   /** Add an evidence node and auto-detect contradictions against existing claims. */
   addEvidence(node: EvidenceNode): void {
     this.addNode(node);

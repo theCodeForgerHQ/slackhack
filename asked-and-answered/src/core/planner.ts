@@ -97,15 +97,80 @@ function overlapScore(a: Set<string>, b: Set<string>): number {
   return n;
 }
 
+export interface SearchCacheOptions {
+  /** TTL in milliseconds. Defaults to 5 minutes. */
+  ttlMs?: number;
+  /** Current workspace evidence state signature. Caching is enabled only when provided. */
+  signature?: () => string;
+  /** Requester scope so two users never share cached workspace results. */
+  requesterId?: string;
+  /** Injectable clock; defaults to `Date.now`. */
+  now?: () => number;
+}
+
 export interface PlannerOptions {
   budget: RateBudget;
   /** Injectable for tests; production uses real setTimeout. */
   sleep: (ms: number) => Promise<void>;
+  /** Delta-scoped search cache. */
+  cache?: SearchCacheOptions;
 }
 
 export interface RetrieveOptions {
   strategy: 'per-question' | 'or-batch';
   limit?: number;
+}
+
+interface CacheEntry {
+  hits: RtsHit[];
+  signature: string;
+  expiresAt: number;
+}
+
+class SearchCache {
+  private readonly store = new Map<string, CacheEntry>();
+
+  constructor(private readonly opts: SearchCacheOptions) {}
+
+  private key(text: string): string {
+    return `${this.opts.requesterId ?? 'default'}:${buildSearchQuery(text)}`;
+  }
+
+  private now(): number {
+    return this.opts.now ? this.opts.now() : Date.now();
+  }
+
+  currentSignature(): string {
+    return this.opts.signature ? this.opts.signature() : '';
+  }
+
+  get(text: string, signature: string): RtsHit[] | undefined {
+    const k = this.key(text);
+    const entry = this.store.get(k);
+    if (!entry) return undefined;
+    if (entry.expiresAt <= this.now() || entry.signature !== signature) {
+      this.store.delete(k);
+      return undefined;
+    }
+    return entry.hits;
+  }
+
+  set(text: string, signature: string, hits: RtsHit[]): void {
+    const ttlMs = this.opts.ttlMs ?? 300_000;
+    this.store.set(this.key(text), {
+      hits,
+      signature,
+      expiresAt: this.now() + ttlMs,
+    });
+  }
+
+  warm(questions: Question[], evidence: Map<string, QuestionEvidence>): void {
+    const signature = this.currentSignature();
+    for (const q of questions) {
+      const ev = evidence.get(q.id);
+      if (ev && !ev.searchFailed) this.set(q.text, signature, ev.hits);
+    }
+  }
 }
 
 /**
@@ -119,18 +184,64 @@ export interface RetrieveOptions {
  *   budget cannot afford per-question.
  */
 export class QueryPlanner {
+  private readonly cache: SearchCache | undefined;
+
   constructor(
     private readonly rts: RtsClient,
     private readonly opts: PlannerOptions,
-  ) {}
+  ) {
+    if (opts.cache?.signature) {
+      this.cache = new SearchCache(opts.cache);
+    }
+  }
 
   async retrieve(
     questions: Question[],
     options: RetrieveOptions,
   ): Promise<Map<string, QuestionEvidence>> {
+    if (options.strategy === 'per-question' && this.cache) {
+      return this.retrieveCached(questions, options);
+    }
     return options.strategy === 'per-question'
       ? this.retrievePerQuestion(questions, options)
       : this.retrieveOrBatch(questions, options);
+  }
+
+  /** Pre-fetch and cache search results for a list of questions. */
+  async warm(questions: Question[], options?: RetrieveOptions): Promise<void> {
+    if (!this.cache) return;
+    const evidence = await this.retrieve(questions, options ?? { strategy: 'per-question' });
+    this.cache.warm(questions, evidence);
+  }
+
+  private async retrieveCached(
+    questions: Question[],
+    options: RetrieveOptions,
+  ): Promise<Map<string, QuestionEvidence>> {
+    const signature = this.cache!.currentSignature();
+    const out = new Map<string, QuestionEvidence>();
+    const missing: Question[] = [];
+
+    for (const q of questions) {
+      const cachedHits = this.cache!.get(q.text, signature);
+      if (cachedHits !== undefined) {
+        out.set(q.id, { questionId: q.id, hits: cachedHits, searchFailed: false });
+      } else {
+        missing.push(q);
+      }
+    }
+
+    if (missing.length === 0) return out;
+
+    const fetched = await this.retrievePerQuestion(missing, options);
+    for (const [id, ev] of fetched) {
+      out.set(id, ev);
+      if (!ev.searchFailed) {
+        const question = missing.find((q) => q.id === id);
+        if (question) this.cache!.set(question.text, signature, ev.hits);
+      }
+    }
+    return out;
   }
 
   private async gate(): Promise<void> {

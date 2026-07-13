@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Asked &amp; Answered — Security questionnaires, answered from Slack</title>
+    <style>
+      :root {
+        --bg: #0b0d14;
+        --surface: #12151f;
+        --surface-2: #1a1d29;
+        --text: #e8eaf0;
+        --muted: #9aa2b2;
+        --accent: #4f8cff;
+        --accent-2: #3bd0ee;
+        --danger: #ff6b6b;
+        --success: #5ee4a0;
+        --border: #252a3a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+      header { padding: 64px 0 40px; text-align: center; }
+      .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(78, 140, 255, 0.12);
+        color: var(--accent-2);
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        margin-bottom: 20px;
+      }
+      h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); margin: 0 0 16px; line-height: 1.15; }
+      .pitch { font-size: 1.25rem; color: var(--muted); max-width: 640px; margin: 0 auto 32px; }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 28px;
+        border-radius: 10px;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.05rem;
+        transition: transform 0.1s ease, background 0.15s ease;
+      }
+      .cta:hover { text-decoration: none; background: #3a7aef; transform: translateY(-1px); }
+      .cta svg { width: 22px; height: 22px; fill: currentColor; }
+      .claims {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        padding: 40px 0;
+      }
+      .claim {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+      }
+      .claim-icon { font-size: 1.6rem; margin-bottom: 12px; }
+      .claim h3 { margin: 0 0 8px; font-size: 1.1rem; }
+      .claim p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+      .section { padding: 40px 0; }
+      .section h2 { font-size: 1.5rem; margin: 0 0 16px; }
+      .section p { color: var(--muted); margin: 0 0 12px; }
+      .docs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .doc {
+        padding: 12px 18px;
+        border-radius: 10px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        font-weight: 600;
+      }
+      footer { padding: 40px 0 64px; text-align: center; color: var(--muted); font-size: 0.9rem; }
+      .success-banner {
+        display: none;
+        margin-bottom: 24px;
+        padding: 14px 20px;
+        border-radius: 10px;
+        background: rgba(94, 228, 160, 0.12);
+        color: var(--success);
+        border: 1px solid rgba(94, 228, 160, 0.25);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="badge">Slack-native compliance agent</div>
+        <h1>Asked &amp; Answered</h1>
+        <p class="pitch">
+          Turn your workspace's Slack history into completed security questionnaires —
+          every answer cited, every uncertain question routed to a human, every approval logged.
+        </p>
+        <div class="success-banner" id="success-banner">Installed successfully. You can return to Slack.</div>
+        <a class="cta" href="/slack/install" role="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15a2 2 0 0 1-2-2 2 2 0 0 1 2-2h2v2a2 2 0 0 1-2 2Zm0-6a2 2 0 0 1-2-2 2 2 0 0 1 2-2h2v4Zm3-4h2a2 2 0 0 0 0-4H9Zm0 6h2v-4H9Zm0 6h2a2 2 0 1 0 0-4H9Zm0 6h2a2 2 0 1 0 0-4H9Zm3-10h2v-2a2 2 0 1 0-2 2Zm0 4h2v-4h-2Zm0 6h2v-4h-2Zm0 6h2v-2a2 2 0 1 0-2 2Zm3-12a2 2 0 1 1 2-2v2Zm-2 4h4a2 2 0 1 1 0 4h-4Zm0 6h4a2 2 0 1 1 0 4h-4Z"/></svg>
+          Add to Slack
+        </a>
+      </header>
+
+      <section class="claims" aria-label="Core claims">
+        <article class="claim">
+          <div class="claim-icon">🛡️</div>
+          <h3>Verified / Grounded / Needs SME</h3>
+          <p>Every answer is either proven from workspace evidence or explicitly routed to a human expert. No invented compliance.</p>
+        </article>
+        <article class="claim">
+          <div class="claim-icon">🔒</div>
+          <h3>Fail-closed by design</h3>
+          <p>When evidence is missing, search fails, or citations degrade, the agent stops and asks — it never guesses.</p>
+        </article>
+        <article class="claim">
+          <div class="claim-icon">👁️</div>
+          <h3>Permission invariant</h3>
+          <p>An answer is returned only if the requester can currently see every citation backing it, re-checked on every read.</p>
+        </article>
+        <article class="claim">
+          <div class="claim-icon">📚</div>
+          <h3>Compounding library</h3>
+          <p>Approved answers become reusable, permission-aware assets that make future questionnaires faster and more consistent.</p>
+        </article>
+      </section>
+
+      <section class="section">
+        <h2>For judges &amp; prospects</h2>
+        <p>
+          The docs below explain the engineering claims, the real-world impact, and the evaluation evidence
+          behind Asked &amp; Answered.
+        </p>
+        <div class="docs">
+          <a class="doc" href="docs/SUBMISSION.md">SUBMISSION.md</a>
+          <a class="doc" href="docs/IMPACT.md">IMPACT.md</a>
+          <a class="doc" href="docs/EVALS.md">EVALS.md</a>
+        </div>
+      </section>
+
+      <footer>
+        MIT licensed · Built for teams that answer the same security questions over and over.
+      </footer>
+    </div>
+
+    <script>
+      if (new URLSearchParams(window.location.search).get('installed') === '1') {
+        document.getElementById('success-banner').style.display = 'block';
+      }
+    </script>
+  </body>
+</html>

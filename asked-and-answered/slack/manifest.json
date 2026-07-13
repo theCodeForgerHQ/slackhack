@@ -46,7 +46,8 @@
   },
   "oauth_config": {
     "redirect_urls": [
-      "https://asked-and-answered-app.onrender.com/oauth/user"
+      "https://asked-and-answered-app.onrender.com/oauth/user",
+      "https://asked-and-answered-app.onrender.com/slack/oauth/callback"
     ],
     "scopes": {
       "bot": [

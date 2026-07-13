@@ -18,12 +18,12 @@ export interface DataTableOptions {
 /** Slack modal view for dense review — data_table renders here (not in DM messages). */
 export function reviewModalView(
   results: DraftResult[],
-  opts: { runId: string; title?: string; callbackId?: string },
+  opts: { runId: string; title?: string; callbackId?: string; useDataTable?: boolean },
 ): Record<string, unknown> {
   const blocks = reviewDataTableBlocks(results, {
     runId: opts.runId,
     title: opts.title ?? 'Questionnaire review',
-    useDataTable: true,
+    useDataTable: opts.useDataTable !== false,
   });
   // Modals cap at 100 blocks; data_table + header + actions is well under.
   return {

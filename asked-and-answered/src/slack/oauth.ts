@@ -18,22 +18,30 @@ export interface UserTokenStore {
   getUserToken(userId: string): string | undefined;
   saveUserToken(userId: string, token: string, scopes: string[]): void;
   revokeUserToken(userId: string): void;
+  hasUserTokenWithScope(scope: string): boolean;
 }
 
 /** In-memory fallback for tests and single-process dev. */
 export class InMemoryUserTokenStore implements UserTokenStore {
-  private readonly tokens = new Map<string, string>();
+  private readonly tokens = new Map<string, { token: string; scopes: string[] }>();
 
   getUserToken(userId: string): string | undefined {
-    return this.tokens.get(userId);
+    return this.tokens.get(userId)?.token;
   }
 
-  saveUserToken(userId: string, token: string, _scopes: string[]): void {
-    this.tokens.set(userId, token);
+  saveUserToken(userId: string, token: string, scopes: string[]): void {
+    this.tokens.set(userId, { token, scopes });
   }
 
   revokeUserToken(userId: string): void {
     this.tokens.delete(userId);
+  }
+
+  hasUserTokenWithScope(scope: string): boolean {
+    for (const entry of this.tokens.values()) {
+      if (entry.scopes.includes(scope)) return true;
+    }
+    return false;
   }
 }
 
@@ -86,6 +94,13 @@ export class SqliteUserTokenStore implements UserTokenStore {
 
   revokeUserToken(userId: string): void {
     this.db.prepare('DELETE FROM user_tokens WHERE user_id = ?').run(userId);
+  }
+
+  hasUserTokenWithScope(scope: string): boolean {
+    const row = this.db
+      .prepare("SELECT 1 as found FROM user_tokens WHERE scopes LIKE '%' || ? || '%' LIMIT 1")
+      .get(scope) as { found: number } | undefined;
+    return row?.found === 1;
   }
 
   private encrypt(plain: string): string {

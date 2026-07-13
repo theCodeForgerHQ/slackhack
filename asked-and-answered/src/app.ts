@@ -13,9 +13,11 @@ import { createDrafter } from './llm/index.js';
 import { invariantHealthCheck } from './core/invariant.js';
 import {
   answerCardBlocks,
+  agentRunCardBlocks,
   planSummaryText,
   reviewTableBlocks,
   smeRequestBlocks,
+  staleAlertBlocks,
 } from './slack/blocks.js';
 import { appHomeBlocks, gatherHomeStats } from './slack/appHome.js';
 import { reviewModalView } from './slack/dataTable.js';
@@ -26,11 +28,32 @@ import { registerWorkflowStep } from './slack/workflowStep.js';
 import { verifyPipelineCodeLevel } from '../scripts/verifyPipelineCodeLevel.js';
 import { runQuestionnaire, ReviewSession, type RunDeps } from './slack/flows.js';
 import { ActionTokenStore, SlackRtsClient } from './slack/rts.js';
+import { Watcher } from './core/watcher.js';
 import { ChannelMembershipChecker } from './slack/visibility.js';
 import { InMemorySessionStore, SqliteSessionStore, type SessionStore } from './slack/sessionStore.js';
 import { InMemoryUserTokenStore, SqliteUserTokenStore, type UserTokenStore, buildUserOAuthUrl } from './slack/oauth.js';
+import {
+  InMemoryInstallationStore,
+  SqliteInstallationStore,
+  type InstallationStore,
+} from './slack/installStore.js';
+import { buildInstallOAuthUrl, handleInstallOAuthCallback } from './slack/installOAuth.js';
+import { probeCapabilities, type CapabilityMap } from './core/capabilityProbe.js';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 const { App } = bolt;
+
+function serveDoc(res: import('node:http').ServerResponse, relativePath: string): void {
+  try {
+    const md = readFileSync(resolve(relativePath), 'utf8');
+    res.writeHead(200, { 'Content-Type': 'text/markdown; charset=utf-8' });
+    res.end(md);
+  } catch {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not found');
+  }
+}
 
 /**
  * Asked & Answered — Bolt wiring (App A, internal install).
@@ -52,6 +75,24 @@ function required(name: string): string {
 // hardcoded fallback would defeat the dictionary-attack protection.
 required('AA_LEDGER_KEY');
 
+const dbPath = process.env.AA_DB_PATH ?? 'asked-and-answered.db';
+
+const installationStore: InstallationStore =
+  process.env.AA_SESSION_STORE === 'memory'
+    ? new InMemoryInstallationStore()
+    : SqliteInstallationStore.atPath(dbPath.replace(/\.db$/, '-installations.db'));
+
+const defaultCapabilities: CapabilityMap = {
+  // Default to optimistic when no installation record exists yet, so
+  // single-workspace deployments that boot with SLACK_BOT_TOKEN keep
+  // behaving as before. The probe will downgrade these once it sees scopes.
+  canvas: true,
+  lists: true,
+  dataTable: true,
+  userSearch: false,
+};
+let capabilities: CapabilityMap = defaultCapabilities;
+
 const app = new App({
   token: required('SLACK_BOT_TOKEN'),
   signingSecret: required('SLACK_SIGNING_SECRET'),
@@ -62,9 +103,15 @@ const app = new App({
     {
       path: '/health',
       method: ['GET'],
-      handler: (_req, res) => {
-        res.writeHead(200);
-        res.end('ok');
+      handler: (req, res) => {
+        const accept = req.headers.accept ?? '';
+        if (accept.includes('application/json')) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'ok', capabilities }));
+        } else {
+          res.writeHead(200);
+          res.end('ok');
+        }
       },
     },
     {
@@ -80,8 +127,14 @@ const app = new App({
       path: '/',
       method: ['GET'],
       handler: (_req, res) => {
-        res.writeHead(200);
-        res.end('Asked & Answered');
+        try {
+          const html = readFileSync(resolve('public/index.html'), 'utf8');
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(html);
+        } catch {
+          res.writeHead(200);
+          res.end('Asked & Answered');
+        }
       },
     },
     {
@@ -146,10 +199,87 @@ const app = new App({
         }
       },
     },
+    {
+      path: '/slack/install',
+      method: ['GET'],
+      handler: (_req, res) => {
+        const clientId = process.env.SLACK_CLIENT_ID;
+        if (!clientId) {
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Server missing SLACK_CLIENT_ID');
+          return;
+        }
+        const redirectUri = process.env.AA_PUBLIC_URL
+          ? `${process.env.AA_PUBLIC_URL}/slack/oauth/callback`
+          : `http://localhost:${process.env.PORT ?? 3000}/slack/oauth/callback`;
+        const url = buildInstallOAuthUrl({
+          clientId,
+          redirectUri,
+          stateSecret: process.env.SLACK_SIGNING_SECRET ?? '',
+          teamId: process.env.SLACK_TEAM_ID,
+        });
+        res.writeHead(302, { Location: url });
+        res.end();
+      },
+    },
+    {
+      path: '/slack/oauth/callback',
+      method: ['GET'],
+      handler: async (req, res) => {
+        const clientId = process.env.SLACK_CLIENT_ID;
+        const clientSecret = process.env.SLACK_CLIENT_SECRET;
+        if (!clientId || !clientSecret) {
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Server missing OAuth credentials');
+          return;
+        }
+        const redirectUri = process.env.AA_PUBLIC_URL
+          ? `${process.env.AA_PUBLIC_URL}/slack/oauth/callback`
+          : `http://localhost:${process.env.PORT ?? 3000}/slack/oauth/callback`;
+        const successUrl = process.env.AA_PUBLIC_URL
+          ? `${process.env.AA_PUBLIC_URL}/slack/install/success`
+          : `http://localhost:${process.env.PORT ?? 3000}/slack/install/success`;
+        await handleInstallOAuthCallback(req, res, {
+          installationStore,
+          clientId,
+          clientSecret,
+          redirectUri,
+          stateSecret: process.env.SLACK_SIGNING_SECRET ?? '',
+          successUrl,
+        });
+      },
+    },
+    {
+      path: '/slack/install/success',
+      method: ['GET'],
+      handler: (_req, res) => {
+        try {
+          const html = readFileSync(resolve('public/install-success.html'), 'utf8');
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(html);
+        } catch {
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end('<h1>Installation successful</h1><p>You can now return to Slack.</p>');
+        }
+      },
+    },
+    {
+      path: '/docs/SUBMISSION.md',
+      method: ['GET'],
+      handler: (_req, res) => serveDoc(res, 'docs/SUBMISSION.md'),
+    },
+    {
+      path: '/docs/IMPACT.md',
+      method: ['GET'],
+      handler: (_req, res) => serveDoc(res, 'docs/IMPACT.md'),
+    },
+    {
+      path: '/docs/EVALS.md',
+      method: ['GET'],
+      handler: (_req, res) => serveDoc(res, 'docs/EVALS.md'),
+    },
   ],
 });
-
-const dbPath = process.env.AA_DB_PATH ?? 'asked-and-answered.db';
 
 // V3 components: evidence graph + conformal matcher power the approved library.
 const graph = new EvidenceGraph();
@@ -271,6 +401,11 @@ function depsForUser(userId: string): RunDeps {
     planner: new QueryPlanner(rts, {
       budget: new RateBudget({ maxPerWindow: 9, windowMs: 60_000 }),
       sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+      cache: {
+        ttlMs: Number(process.env.AA_RTS_CACHE_TTL_MS ?? 300_000),
+        signature: () => graph.stateSignature(),
+        requesterId: userId,
+      },
     }),
   };
 }
@@ -290,7 +425,7 @@ app.event('app_home_opened', async ({ event, client }) => {
     const stats = await gatherHomeStats(library, ledgerV2, userId, deps.visibility);
     const invariant = await invariantHealthCheck();
     stats.invariantOk = invariant.status === 'pass';
-    const homeOpts: { invariantCheckUrl?: string } = {};
+    const homeOpts: { invariantCheckUrl?: string; useDataTable?: boolean } = { useDataTable: capabilities.dataTable };
     if (process.env.AA_PUBLIC_URL) {
       homeOpts.invariantCheckUrl = `${process.env.AA_PUBLIC_URL}/invariant`;
     }
@@ -445,6 +580,7 @@ app.message(async ({ message, client }) => {
             channel,
             thread || undefined,
             doc,
+            { forceFallback: !capabilities.canvas },
           );
           await app.client.chat.postMessage({
             channel,
@@ -486,6 +622,31 @@ app.action('open_answer_card', async ({ ack, body, client, action }) => {
     });
   } catch (err) {
     console.error('open_answer_card failed', err);
+  }
+});
+
+app.action('open_run_card', async ({ ack, body, client, action }) => {
+  await ack();
+  try {
+    const actorUserId = (body as { user?: { id?: string } }).user?.id ?? 'unknown';
+    const resolved = sessionForValue((action as { value?: string }).value, actorUserId);
+    const t = target(body);
+    if (!resolved || !t) return;
+    const result = resolved.session.results.find((r) => r.questionId === resolved.questionId);
+    if (!result) return;
+    const signatures = {
+      timestamp: new Date().toISOString(),
+      confirmActor: resolved.session.confirmedQuestionIds.has(resolved.questionId) ? actorUserId : undefined,
+      approveActor: result.approvedBy,
+    };
+    await client.chat.postMessage({
+      channel: t.channel,
+      thread_ts: t.thread,
+      text: `Agent Run Card — ${result.questionText}`,
+      blocks: agentRunCardBlocks(result, resolved.session.runId, signatures) as never,
+    });
+  } catch (err) {
+    console.error('open_run_card failed', err);
   }
 });
 
@@ -724,6 +885,7 @@ app.action('open_review_modal', async ({ ack, body, client, action }) => {
       view: reviewModalView(resolved.session.results, {
         runId: resolved.session.runId,
         title: 'Questionnaire review',
+        useDataTable: capabilities.dataTable,
       }) as never,
     });
   } catch (err) {
@@ -743,7 +905,9 @@ app.action('export_canvas', async ({ ack, body, client, action }) => {
       requesterId: resolved.session.requesterId,
       title: 'Questionnaire — Asked & Answered',
     });
-    const result = await createCanvasOrFallback(client, t.channel, t.thread, doc);
+    const result = await createCanvasOrFallback(client, t.channel, t.thread, doc, {
+      forceFallback: !capabilities.canvas,
+    });
     await client.chat.postMessage({
       channel: t.channel,
       thread_ts: t.thread,
@@ -761,6 +925,14 @@ app.action('export_list', async ({ ack, body, client, action }) => {
     const actorUserId = (body as { user?: { id?: string } }).user?.id ?? 'unknown';
     const resolved = sessionForValue((action as { value?: string }).value, actorUserId);
     if (!resolved || !t) return;
+    if (!capabilities.lists) {
+      await client.chat.postMessage({
+        channel: t.channel,
+        thread_ts: t.thread,
+        text: ':warning: Slack List export is unavailable in this workspace (`lists:write` scope missing). Try Export xlsx or Canvas.',
+      });
+      return;
+    }
     const result = await exportToSlackList(client, resolved.session.results, {
       runId: resolved.session.runId,
       requesterId: resolved.session.requesterId,
@@ -925,7 +1097,7 @@ app.action('apphome_return_home', async ({ ack, body, client }) => {
   const stats = await gatherHomeStats(library, ledgerV2, userId, deps.visibility);
   const invariant = await invariantHealthCheck();
   stats.invariantOk = invariant.status === 'pass';
-  const homeOpts: { invariantCheckUrl?: string } = {};
+  const homeOpts: { invariantCheckUrl?: string; useDataTable?: boolean } = { useDataTable: capabilities.dataTable };
   if (process.env.AA_PUBLIC_URL) {
     homeOpts.invariantCheckUrl = `${process.env.AA_PUBLIC_URL}/invariant`;
   }
@@ -975,6 +1147,70 @@ async function openAnswerModal(
   });
 }
 
+
+// Proactive stale/contradiction watcher: DM the original approver when an
+// approved answer is contradicted or superseded by newer workspace evidence.
+const watcher = new Watcher(library, graph, {
+  intervalMs: Number(process.env.AA_WATCHER_INTERVAL_MS ?? 3_600_000),
+  onStale: async (alert) => {
+    try {
+      const dm = await app.client.conversations.open({ users: alert.approvedBy });
+      if (!dm.channel?.id) return;
+      await app.client.chat.postMessage({
+        channel: dm.channel.id,
+        text: `Stale answer detected: ${alert.questionText}`,
+        blocks: staleAlertBlocks(alert) as never,
+      });
+    } catch (err) {
+      console.error('watcher stale DM failed', err);
+    }
+  },
+});
+watcher.start();
+
+app.action('open_stale_review_modal', async ({ ack, body, client, action }) => {
+  await ack();
+  try {
+    const answerId = Number((action as { value?: string }).value);
+    if (Number.isNaN(answerId)) return;
+    const answer = library.getById(answerId);
+    if (!answer) return;
+    const result = {
+      questionId: String(answer.id),
+      questionText: answer.questionText,
+      state: 'verified' as const,
+      answerText: answer.answerText,
+      citations: answer.citations,
+      approvedBy: answer.approvedBy,
+      approvedAt: answer.approvedAt,
+    };
+    await client.views.open({
+      trigger_id: (body as { trigger_id: string }).trigger_id,
+      view: {
+        type: 'modal',
+        title: { type: 'plain_text', text: 'Stale answer review' },
+        blocks: answerCardBlocks(result, '', true) as never,
+      },
+    });
+  } catch (err) {
+    console.error('open_stale_review_modal failed', err);
+  }
+});
+
+// Probe Slack capabilities once at startup. Failures are logged but never
+// prevent the app from starting; call sites fall back to safe behavior.
+try {
+  capabilities = await probeCapabilities({
+    client: app.client,
+    installationStore,
+    userTokenStore,
+    teamId: process.env.SLACK_TEAM_ID,
+    probeUserId: process.env.AA_PROBE_USER_ID,
+  });
+  console.log('Capability probe complete', capabilities);
+} catch (err) {
+  console.error('Capability probe failed, using defaults', err);
+}
 
 const port = Number(process.env.PORT ?? 3000);
 await app.start(port);

@@ -1,5 +1,7 @@
+import { createHash } from 'node:crypto';
 import type { DraftResult, NeedsSmeReason } from '../core/pipeline.js';
 import type { VerifyResult } from '../core/ledger.js';
+import type { StaleAlert } from '../core/watcher.js';
 
 /**
  * Block Kit builders — the fallback review surface (sections + buttons,
@@ -95,6 +97,17 @@ export function reviewTableBlocks(
         value: actionValue(runId, r.questionId),
         text: { type: 'plain_text', text: 'Review' },
       },
+    });
+    blocks.push({
+      type: 'actions',
+      elements: [
+        {
+          type: 'button',
+          action_id: 'open_run_card',
+          value: actionValue(runId, r.questionId),
+          text: { type: 'plain_text', text: 'Agent Run Card' },
+        },
+      ],
     });
   }
 
@@ -290,4 +303,141 @@ export function verifyResultBlocks(result: VerifyResult): Block[] {
       },
     },
   ];
+}
+
+export interface RunSignatures {
+  /** ISO timestamp of the run/audit event. */
+  timestamp: string;
+  /** User id that confirmed the draft. */
+  confirmActor?: string | undefined;
+  /** User id that gave final approval. */
+  approveActor?: string | undefined;
+}
+
+function runSignatureHash(
+  runId: string,
+  result: DraftResult,
+  signatures: RunSignatures = { timestamp: new Date().toISOString() },
+): string {
+  const citations = (result.citations ?? []).map((c) => c.permalink).join(',');
+  const actors = [signatures.confirmActor, signatures.approveActor].filter(Boolean).join('|');
+  const payload = `${runId}:${result.questionId}:${result.answerText ?? result.reason ?? ''}:${citations}:${actors}`;
+  return createHash('sha256').update(payload).digest('hex');
+}
+
+/** Render a single answer as a signed "Agent Run" audit card. */
+export function agentRunCardBlocks(
+  result: DraftResult,
+  runId = '',
+  signatures: RunSignatures = { timestamp: new Date().toISOString() },
+): Block[] {
+  const signature = runSignatureHash(runId, result, signatures);
+  const blocks: Block[] = [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*${result.questionText}*\n${STATE_EMOJI[result.state]} ${STATE_LABEL[result.state]}`,
+      },
+    },
+  ];
+
+  if (result.state === 'needs_sme') {
+    blocks.push({
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `_No draft — ${REASON_LABEL[result.reason ?? 'no_evidence']}._`,
+      },
+    });
+  } else {
+    blocks.push({ type: 'section', text: { type: 'mrkdwn', text: result.answerText ?? '' } });
+    const citationLines = (result.citations ?? [])
+      .map((c, i) => `<${c.permalink}|evidence ${i + 1}>`)
+      .join('  ·  ');
+    if (citationLines) {
+      blocks.push({
+        type: 'context',
+        elements: [{ type: 'mrkdwn', text: `:link: ${citationLines}` }],
+      });
+    }
+  }
+
+  const actorParts: string[] = [];
+  if (signatures.confirmActor) actorParts.push(`Confirmed by <@${signatures.confirmActor}>`);
+  if (signatures.approveActor) actorParts.push(`Approved by <@${signatures.approveActor}>`);
+
+  const footerParts: string[] = [`Run \`${runId}\` · ${signatures.timestamp}`];
+  if (actorParts.length > 0) footerParts.push(actorParts.join(' · '));
+  footerParts.push(`Signature \`${signature}\``);
+
+  blocks.push({
+    type: 'context',
+    elements: [{ type: 'mrkdwn', text: `:lock: ${footerParts.join(' · ')}` }],
+  });
+
+  return blocks;
+}
+
+/** Plain-text audit line suitable for exports and logs. */
+export function signedAuditText(
+  result: DraftResult,
+  runId = '',
+  signatures: RunSignatures = { timestamp: new Date().toISOString() },
+): string {
+  const signature = runSignatureHash(runId, result, signatures);
+  const actors = [signatures.confirmActor, signatures.approveActor].filter(Boolean).join('|');
+  return `[${signatures.timestamp}] run=${runId} q=${result.questionId} state=${result.state} actors=${actors} sig=${signature}`;
+}
+
+/** DM card for the proactive stale/contradiction watcher. */
+export function staleAlertBlocks(alert: StaleAlert): Block[] {
+  const contradictionLinks = alert.contradictions
+    .map((c, i) => `<${c.evidence.permalink}|contradiction ${i + 1}>`)
+    .join('  ·  ');
+  const supersessionLinks = alert.supersessions
+    .map((s, i) => `<${s.newEvidence.permalink}|superseder ${i + 1}>`)
+    .join('  ·  ');
+
+  const contextParts: string[] = [];
+  if (contradictionLinks) contextParts.push(`:warning: New contradicting evidence: ${contradictionLinks}`);
+  if (supersessionLinks) contextParts.push(`:new: Superseding evidence: ${supersessionLinks}`);
+
+  const blocks: Block[] = [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `:rotating_light: *Stale answer detected* · approved by <@${alert.approvedBy}> on ${alert.approvedAt}`,
+      },
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*Q:* ${alert.questionText}\n*A:* ${alert.answerText.slice(0, 200)}${alert.answerText.length > 200 ? '…' : ''}`,
+      },
+    },
+  ];
+
+  if (contextParts.length > 0) {
+    blocks.push({
+      type: 'context',
+      elements: [{ type: 'mrkdwn', text: contextParts.join('\n') }],
+    });
+  }
+
+  blocks.push({
+    type: 'actions',
+    elements: [
+      {
+        type: 'button',
+        action_id: 'open_stale_review_modal',
+        value: String(alert.answerId),
+        text: { type: 'plain_text', text: 'Open review modal' },
+      },
+    ],
+  });
+
+  return blocks;
 }

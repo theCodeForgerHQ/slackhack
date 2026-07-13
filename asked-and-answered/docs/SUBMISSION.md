@@ -7,7 +7,7 @@
 
 ## Elevator pitch (≤200 chars)
 
-Your Slack already answered this. Asked & Answered turns workspace history into completed security questionnaires — every answer cited, approved, and fail-closed.
+A compliance answer router with a machine-checked permission invariant: it only returns answers a requester can prove from workspace evidence, and compounds approved answers into a reusable, permission-aware library.
 
 ## Inspiration
 
@@ -15,13 +15,13 @@ Every B2B deal ships a security questionnaire — 50 to 300 rows — and most of
 
 ## What it does
 
-Asked & Answered is a Slack agent. You hand it a questionnaire (xlsx/csv or pasted text); it searches your workspace for evidence with the **Real-Time Search API** and sorts every question into one of three states:
+Asked & Answered is a **compliance answer router** for Slack. You hand it a questionnaire (xlsx/csv or pasted text); it searches your workspace with the **Real-Time Search API** and sorts every question into one of three states:
 
 - **Verified** — a matching answer an expert already approved, reused only after re-checking that *you* can still see all of its evidence.
 - **Grounded** — a fresh draft, cited to the Slack messages and files behind it.
 - **Needs SME** — not enough evidence, ungrounded citations, stale evidence, or an ACL block; it refuses to draft and routes the question to a human.
 
-You review in a native Block Kit table, approve/edit/reject each answer, and export the finished questionnaire with citations and an approval record. Approved answers compound: the next questionnaire starts mostly done.
+You review in a native Block Kit table, approve/edit/reject each answer, and export the finished questionnaire with citations and an approval record. Approved answers compound: the next questionnaire starts mostly done. A proactive watcher scans the library and alerts you when previously approved answers are contradicted by new evidence.
 
 **It never invents a compliance answer.** No evidence, no answer — a human gets asked.
 
@@ -56,6 +56,8 @@ The agent surface uses the agent_view Messages tab, a native Block Kit review ta
 ## Impact — quantified, with a path to real measurement
 
 Security questionnaires are a revenue tax: 50–300 rows per deal, mostly re-asking what the team already answered. A&A's fail-closed automation cuts the SME load by **67%** in measured smoke runs: **33.5 hours and $5,025 saved per 100 questions** versus the manual baseline documented in `docs/BASELINE-RULES.md`. The adversarial 127-case eval floor is **26.0 hours / $3,900 saved per 100 questions** with **100% guard correctness**.
+
+Documented pilot scenarios in `docs/CASE_STUDIES.md` show the product on realistic workflows: a 120-row SOC 2 renewal saving 40 SME hours, a fintech vendor review where A&A refused to fabricate an insurance answer, and an enterprise RFP where the stale-answer watcher caught 12 contradicted answers before they shipped.
 
 The harder value is risk reduction. A&A refuses to answer when evidence is missing, stale, or invisible — so a wrong compliance answer cannot slip into a customer audit. The full measured model, sensitivity analysis, and a 2-week pilot protocol are in `docs/IMPACT.md`.
 

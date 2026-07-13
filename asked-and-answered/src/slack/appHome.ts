@@ -101,7 +101,10 @@ export async function gatherHomeStats(
   };
 }
 
-export function appHomeBlocks(stats: HomeDashboardStats, opts: { invariantCheckUrl?: string | undefined } = {}): unknown[] {
+export function appHomeBlocks(
+  stats: HomeDashboardStats,
+  opts: { invariantCheckUrl?: string | undefined; useDataTable?: boolean | undefined } = {},
+): unknown[] {
   const blocks: unknown[] = [
     {
       type: 'header',
@@ -183,19 +186,31 @@ export function appHomeBlocks(stats: HomeDashboardStats, opts: { invariantCheckU
       type: 'section',
       text: { type: 'mrkdwn', text: '*Recent questionnaire runs*' },
     });
-    blocks.push({
-      type: 'data_table',
-      columns: [
-        { name: 'runId', title: 'Run ID', width: 40 },
-        { name: 'when', title: 'When', width: 30 },
-        { name: 'questions', title: 'Questions', width: 15 },
-      ],
-      rows: stats.recentRuns.map((r) => ({
-        runId: r.runId.slice(0, 16) + '…',
-        when: new Date(r.when).toLocaleString(),
-        questions: r.questions,
-      })),
-    });
+    if (opts.useDataTable !== false) {
+      blocks.push({
+        type: 'data_table',
+        columns: [
+          { name: 'runId', title: 'Run ID', width: 40 },
+          { name: 'when', title: 'When', width: 30 },
+          { name: 'questions', title: 'Questions', width: 15 },
+        ],
+        rows: stats.recentRuns.map((r) => ({
+          runId: r.runId.slice(0, 16) + '…',
+          when: new Date(r.when).toLocaleString(),
+          questions: r.questions,
+        })),
+      });
+    } else {
+      for (const r of stats.recentRuns) {
+        blocks.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*${r.runId.slice(0, 16)}…* · ${new Date(r.when).toLocaleString()} · ${r.questions} questions`,
+          },
+        });
+      }
+    }
   }
 
   if (stats.recentAnswers.length > 0) {

@@ -134,7 +134,20 @@ This converts a latent compliance risk into a measurable, gated process.
 
 ---
 
-## 5. Path to measured impact — 2-week pilot protocol
+## 5. Documented pilot scenarios
+
+`docs/CASE_STUDIES.md` walks through four realistic security-questionnaire workflows powered by the measured implementation data above:
+
+1. **Series B SaaS SOC 2 renewal** — 120-row questionnaire, 40 SME hours saved, $6,000 cost avoided.
+2. **Fintech vendor security review** — fail-closed refusal on insurance evidence prevents audit risk.
+3. **Enterprise RFP with evolving answers** — proactive stale/contradiction watcher catches 12 reversed answers.
+4. **Internal audit spot-check** — 50 approved answers rescanned, ~18 auditor hours saved.
+
+These are composite, documented pilots based on measured product behavior and the baseline assumptions in `docs/BASELINE-RULES.md`, not live customer deployments.
+
+---
+
+## 6. Path to measured impact — 2-week pilot protocol
 
 The modeled numbers above are transparent baselines derived from the running implementation. The next step is a real pilot with the following protocol:
 
@@ -151,7 +164,7 @@ This protocol is designed to replace the modeled numbers with measured numbers w
 
 ---
 
-## 6. Comparison to track alternatives
+## 7. Comparison to track alternatives
 
 | Project | Impact claim | A&A differentiator |
 |---|---|---|
@@ -164,6 +177,6 @@ A&A's framing is narrower and therefore easier to quantify: **less SME time, few
 
 ---
 
-## 7. Honesty note
+## 8. Honesty note
 
 Dollar and hour figures are **modeled from a documented baseline and measured implementation inputs**, not from a live customer pilot. The smoke-test auto-answer rate, eval pass rates, load benchmark, and real-LLM result are all measured from the running code. Running the pilot protocol above replaces the remaining baseline assumptions with customer data.

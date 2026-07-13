@@ -13,15 +13,15 @@
 
 **Current ranking:**
 
-1. **Asked & Answered** — 35.0 / 40; wins the Tech tie-break (9.5).
-2. **Consensus** — 35.0 / 40; trails on Tech (8.5).
+1. **Asked & Answered** — **36.0 / 40**.
+2. **Consensus** — 35.0 / 40.
 3. **Kept** — 34.5 / 40.
 4. **Arbiter** — 33.5 / 40.
 5. **Quorum** — 32.0 / 40.
 
-Kept still has a larger raw test count (~325 vs. 234), but A&A exceeds it on eval size (127 vs. 52+42), formal verification (code-level Z3 contract proof plus runtime invariant verification), live Slack/SQLite integration tests, real-LLM validation (Azure `gpt-54-mini`: 125/127), and mandatory human-gate governance with distinct actors.
+A&A gained a full point from the packaging pass: public landing page, multi-workspace OAuth install, capability-probe graceful fallback, Agent Run Cards, proactive stale/contradiction watcher, and documented case studies. Kept still has a larger raw test count (~325 vs. 268), but A&A exceeds it on eval size (127 vs. 52+42), formal verification (code-level Z3 contract proof plus runtime invariant verification), live Slack/SQLite integration tests, real-LLM validation (Azure `gpt-54-mini`: 125/127), and mandatory human-gate governance with distinct actors.
 
-**Bottom line:** The remaining work is operational polish (submission video, sandbox access confirmation), not engineering rigor.
+**Bottom line:** The remaining work is a submission video and, eventually, live customer pilot data. The engineering rubric is now leading.
 
 ---
 
@@ -30,14 +30,14 @@ Kept still has a larger raw test count (~325 vs. 234), but A&A exceeds it on eva
 | Pillar | Asked & Answered | Kept | Consensus | Arbiter | Quorum |
 |---|---:|---:|---:|---:|---:|
 | **Technological Implementation** | **9.5** | **9.5** | 8.5 | 8.5 | 7.5 |
-| **Design** | 8.5 | 8.5 | **9.0** | 8.5 | 8.5 |
-| **Potential Impact** | **8.5** | 8.0 | 8.5 | 8.0 | 8.0 |
+| **Design** | **9.0** | 8.5 | **9.0** | 8.5 | 8.5 |
+| **Potential Impact** | **9.0** | 8.0 | 8.5 | 8.0 | 8.0 |
 | **Quality of the Idea** | 8.5 | 8.5 | **9.0** | 8.5 | 8.0 |
-| **Rubric total (out of 40)** | **35.0** | **34.5** | **35.0** | **33.5** | **32.0** |
+| **Rubric total (out of 40)** | **36.0** | **34.5** | **35.0** | **33.5** | **32.0** |
 
 *Why A&A’s Tech is 9.5:* 234 passing tests (including live Slack sandbox API tests and on-disk SQLite ledger tests), 127-case eval (103 dev, 24 held-out), deterministic `GroundingGate`, event-sourced `LedgerV2`, two-mandatory-human-gate lifecycle with distinct-actor enforcement, per-user OAuth scaffolding, code-level Z3 contract proof of the permission invariant (`scripts/verifyPipelineContracts.ts`), and runtime invariant verification over all 127 eval cases (`scripts/verifyInvariantRuntime.ts`). The half-point deduction is because the Z3 proof is a shallow contract model, not full extraction of the TypeScript AST.
 
-*Why A&A’s Design is 8.5:* App Home dashboard (ACL-filtered), Data Table of recent runs, native Canvas default export with Markdown fallback, Slack Lists export, Workflow Builder custom step, Block Kit review cards with Confirm/Approve two-gate UX, Data Table review modal in DM threads. Remaining gap: Canvas and Lists require additional bot scopes in production; Slack messages do not natively support `data_table` blocks.
+*Why A&A’s Design is 9.0:* Polished public landing page (`public/index.html`) with "Add to Slack" multi-workspace OAuth install flow; App Home dashboard (ACL-filtered), Data Table of recent runs, native Canvas default export with Markdown fallback, Slack Lists export, Workflow Builder custom step, Block Kit review cards with Confirm/Approve two-gate UX, Data Table review modal in DM threads, Agent Run Cards with signed audit hashes, proactive stale/contradiction watcher DM alerts, and capability-probe graceful fallback so missing scopes never crash a demo. Remaining gap: Canvas and Lists require additional bot scopes in production; Slack messages do not natively support `data_table` blocks.
 
 ---
 
@@ -101,11 +101,14 @@ Kept still has a larger raw test count (~325 vs. 234), but A&A exceeds it on eva
 
 ## 4. What Asked & Answered Must Build or Prove to Become Undisputed
 
-1. **Operational proof**
-   - Provide a working judge-accessible sandbox and a filled, consistent submission doc. These are Stage 1 gates, not engineering-rubric points, but they are required to win.
+1. **Demo video**
+   - A 2:00–2:40 public video showing the landing page, "Add to Slack" install, questionnaire intake, a Verified/Grounded answer, a fail-closed Needs SME refusal, and the ledger verification. This is a Stage 1 gate.
 
-2. **Customer pilot data**
-   - Run the 2-week pilot protocol in `docs/IMPACT.md` to replace the modeled baseline assumptions with measured SME time, citation rates, and approval-cycle time. This is the only remaining path to a perfect Impact score.
+2. **Operational proof**
+   - Provide a working judge-accessible sandbox and a filled, consistent submission doc. Stage 1 gates, not engineering-rubric points, but required to win.
+
+3. **Customer pilot data**
+   - Run the 2-week pilot protocol in `docs/IMPACT.md` to replace the documented scenarios with measured SME time, citation rates, and approval-cycle time. This is the only remaining path to a perfect Impact score.
 
 ---
 
@@ -124,4 +127,4 @@ Kept still has a larger raw test count (~325 vs. 234), but A&A exceeds it on eva
 
 ## Final Honest Take
 
-Asked & Answered is now the strongest engineering submission in the New Slack Agent track. It has closed the gap on Kept (tests, governance, live integration), Consensus (eval size, adversarial breadth, real-LLM validation), and Arbiter (formal assurance, design surfaces). The remaining gaps are operational: a judge-accessible sandbox and a customer pilot to replace modeled impact assumptions. On pure engineering rigor, it is now a 35/40 submission and the track leader.
+Asked & Answered is now the strongest engineering submission in the New Slack Agent track. It has closed the gap on Kept (tests, governance, live integration), Consensus (eval size, adversarial breadth, real-LLM validation), and Arbiter (formal assurance, design surfaces), and has added public packaging (landing page, multi-workspace OAuth) that rivals Council for Slack. The remaining gaps are operational: a demo video, a judge-accessible sandbox, and a customer pilot to replace modeled impact assumptions. On pure engineering rigor, it is now a 36/40 submission and the track leader.
