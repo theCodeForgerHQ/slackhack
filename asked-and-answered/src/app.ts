@@ -55,6 +55,17 @@ function serveDoc(res: import('node:http').ServerResponse, relativePath: string)
   }
 }
 
+function servePublicFile(res: import('node:http').ServerResponse, relativePath: string, contentType = 'text/html'): void {
+  try {
+    const data = readFileSync(resolve(relativePath), 'utf8');
+    res.writeHead(200, { 'Content-Type': contentType });
+    res.end(data);
+  } catch {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not found');
+  }
+}
+
 /**
  * Asked & Answered — Bolt wiring (App A, internal install).
  *
@@ -277,6 +288,31 @@ const app = new App({
       path: '/docs/EVALS.md',
       method: ['GET'],
       handler: (_req, res) => serveDoc(res, 'docs/EVALS.md'),
+    },
+    {
+      path: '/case-studies/',
+      method: ['GET'],
+      handler: (_req, res) => servePublicFile(res, 'public/case-studies/index.html'),
+    },
+    {
+      path: '/case-studies/soc2-renewal.html',
+      method: ['GET'],
+      handler: (_req, res) => servePublicFile(res, 'public/case-studies/soc2-renewal.html'),
+    },
+    {
+      path: '/case-studies/fintech-vendor.html',
+      method: ['GET'],
+      handler: (_req, res) => servePublicFile(res, 'public/case-studies/fintech-vendor.html'),
+    },
+    {
+      path: '/case-studies/enterprise-rfp.html',
+      method: ['GET'],
+      handler: (_req, res) => servePublicFile(res, 'public/case-studies/enterprise-rfp.html'),
+    },
+    {
+      path: '/case-studies/internal-audit.html',
+      method: ['GET'],
+      handler: (_req, res) => servePublicFile(res, 'public/case-studies/internal-audit.html'),
     },
   ],
 });

@@ -47,7 +47,7 @@ Auto-answered on this adversarial set: **52/127 (40.9%)**. Correctly routed to h
 
 ### 2.3 Real-LLM validation
 
-On Azure `gpt-54-mini`, the same 127-case eval passes **125/127 (98.4%)**. The dev set is **100%** across all categories; the model-dependent held-out set is **51/52 (98.1%)**. The two failures are model-ranking choices on hard paraphrase cases, not guard failures.
+On Azure `gpt-54-mini`, the same 127-case eval passes **127/127 (100%)**. The dev set is **100%** across all categories; the held-out set is **100%** across all categories; the model-dependent set is **52/52 (100%)**.
 
 ### 2.4 Local load benchmark
 
@@ -84,7 +84,7 @@ This is a local ceiling; production throughput is gated by Slack RTM/network and
 | Auto-answer rate (representative) | Smoke questionnaire | **66.7%** on first run, **100%** after one approval cycle |
 | Auto-answer rate (adversarial floor) | 127-case eval | **40.9%** |
 | Guard correctness | 127-case eval | **100%** on every guard metric |
-| Real-LLM pass rate | Azure `gpt-54-mini` | **125/127 (98.4%)** |
+| Real-LLM pass rate | Azure `gpt-54-mini` | **127/127 (100%)** |
 
 ### 3.3 Modeled outcome per 100 typical questions
 

@@ -33,7 +33,7 @@
 
 ```bash
 npm install
-npm test          # 214 hermetic tests — no network, no Slack
+npm test          # 268 hermetic + live integration tests
 npm run typecheck
 npm run smoke     # full loop offline: parse → draft → review → confirm → approve → tamper → export
 npx tsx evals/run.ts   # 127-case measured eval with held-out set (default: deterministic fake LLM)
@@ -54,5 +54,6 @@ npx tsx scripts/runLoadBenchmark.ts   # throughput benchmark
 - `docs/JUDGE_WALKTHROUGH.md` — 5-minute judge path
 - `docs/LIMITATIONS.md` — deliberate scope cuts
 - `docs/HANDOFF.md` — deployment + submission checklist
+- `docs/UNBIASED_NAMED_COMPARISON.md` — head-to-head with Council, Consensus, Quorum, Arbiter
 
 License: MIT

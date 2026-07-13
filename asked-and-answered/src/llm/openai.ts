@@ -75,6 +75,10 @@ export class OpenAiDrafter implements DraftingLlm {
       }
 
       const text = data.choices?.[0]?.message?.content ?? '';
+      const rateLimitDelay = Number(process.env.AA_LLM_RATE_LIMIT_DELAY_MS ?? '0');
+      if (rateLimitDelay > 0) {
+        await new Promise((resolve) => setTimeout(resolve, rateLimitDelay));
+      }
       return parseDraftReply(text);
     }
   }

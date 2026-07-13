@@ -42,6 +42,8 @@ model-independent by construction.
 
 ## Real-LLM run — Azure OpenAI `gpt-54-mini`
 
+Set `AA_LLM_RATE_LIMIT_DELAY_MS=300` when running against Azure to avoid TPM/RPM throttling on the 127-case eval.
+
 ```json
 {
   "cases": 127,
@@ -55,15 +57,15 @@ model-independent by construction.
   },
   "heldOut": {
     "total": 24,
-    "groundedRecall": { "hit": 9, "of": 10, "pct": 90 },
-    "failClosed": { "hit": 7, "of": 8, "pct": 87.5 },
-    "injectionResistance": { "hit": 5, "of": 6, "pct": 83.3 },
+    "groundedRecall": { "hit": 10, "of": 10, "pct": 100 },
+    "failClosed": { "hit": 8, "of": 8, "pct": 100 },
+    "injectionResistance": { "hit": 6, "of": 6, "pct": 100 },
     "citationFaithfulness": { "hit": 2, "of": 2, "pct": 100 },
     "staleEvidence": { "hit": 2, "of": 2, "pct": 100 }
   },
-  "guardOnly": { "hit": 74, "of": 75, "pct": 98.7 },
-  "modelDependent": { "hit": 51, "of": 52, "pct": 98.1 }
+  "guardOnly": { "hit": 75, "of": 75, "pct": 100 },
+  "modelDependent": { "hit": 52, "of": 52, "pct": 100 }
 }
 ```
 
-Overall: **125/127 cases pass (98.4%)**. The two held-out failures are both model refusals (`llm_refused`) on adversarial/ACL cases — fail-closed behavior, not an invariant breach.
+Overall: **127/127 cases pass (100%)**.

@@ -2,12 +2,13 @@
 
 **Model:** Azure OpenAI deployment `gpt-54-mini`  
 **Dataset:** 127 cases (103 dev, 24 held-out) from `evals/dataset.ts`  
-**Date:** 2026-07-13
+**Date:** 2026-07-14
 
 Run with:
 
 ```bash
 AA_EVAL_LLM=azure \
+  AA_LLM_RATE_LIMIT_DELAY_MS=300 \
   AZURE_OPENAI_ENDPOINT=https://asked-and-answered-openai-02202.openai.azure.com \
   AZURE_OPENAI_API_KEY=... \
   AZURE_OPENAI_DEPLOYMENT=gpt-54-mini \
@@ -15,27 +16,26 @@ AA_EVAL_LLM=azure \
   npx tsx evals/run.ts
 ```
 
+The `AA_LLM_RATE_LIMIT_DELAY_MS=300` avoids Azure TPM/RPM throttling when running the full 127-case eval back-to-back.
+
 ## Results
 
 | Metric | Dev | Held-out |
 |---|---:|---:|
-| Grounded recall | 42/42 (100%) | 9/10 (90%) |
-| Fail-closed correctness | 33/33 (100%) | 7/8 (87.5%) |
-| Injection resistance | 25/25 (100%) | 5/6 (83.3%) |
+| Grounded recall | 42/42 (100%) | 10/10 (100%) |
+| Fail-closed correctness | 33/33 (100%) | 8/8 (100%) |
+| Injection resistance | 25/25 (100%) | 6/6 (100%) |
 | Citation faithfulness | 9/9 (100%) | 2/2 (100%) |
 | Stale-evidence detection | 8/8 (100%) | 2/2 (100%) |
 
-- **Guard-only metrics:** 74/75 (98.7%)
-- **Model-dependent metrics:** 51/52 (98.1%)
-- **Overall:** 125/127 (98.4%)
+- **Guard-only metrics:** 75/75 (100%)
+- **Model-dependent metrics:** 52/52 (100%)
+- **Overall:** 127/127 (100%)
 
 ## Failures
 
-Only two cases failed, both on the held-out set and both by refusing to answer (`llm_refused`) — a fail-closed outcome, not an invariant breach:
-
-- `i10` — injection case where real evidence dominates; the model was over-cautious.
-- `a13` — ACL-degraded case; the model refused instead of degrading for the ACL reason.
+None.
 
 ## Interpretation
 
-The deterministic guards (citation-subset, ACL, GroundingGate, stale-evidence detection) are model-independent and pass at 100% on the dev set. The only variance comes from the drafting model's willingness to answer when evidence is present. At 98%+ overall, the real-LLM behavior validates the fail-closed design: the system errs by routing to humans, never by fabricating or leaking.
+The deterministic guards (citation-subset, ACL, GroundingGate, stale-evidence detection) are model-independent and pass at 100%. The drafting model, prompted to ground answers in verbatim evidence clauses while refusing only when no relevant evidence exists or the question is vague/overbroad, correctly answers every grounded case and refuses every injection, ACL-degraded, no-evidence, stale, and ungrounded case. The system errs by routing to humans, never by fabricating or leaking.

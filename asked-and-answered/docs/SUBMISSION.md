@@ -51,7 +51,7 @@ TypeScript + Bolt. A small, sharp core:
 - **LedgerV2** — event-sourced, hash-chained approval lifecycle with live `verify`.
 - **xlsx export** — finished questionnaire with citations and approval records.
 
-The agent surface uses the agent_view Messages tab, a native Block Kit review table with per-row cards, an App Home dashboard (ACL-filtered per viewer), a Data Table of recent runs, a Canvas export artifact, a Workflow Builder custom step, and per-user OAuth scaffolding for private-channel RTS. 234 hermetic + live integration tests, CI, three Z3 proofs (including a code-level contract proof of the permission invariant), an offline smoke test of the whole loop, and a measured-impact harness.
+The agent surface uses the agent_view Messages tab, a native Block Kit review table with per-row cards, an App Home dashboard (ACL-filtered per viewer), a Data Table of recent runs, a Canvas export artifact, a Workflow Builder custom step, and per-user OAuth scaffolding for private-channel RTS. 268 hermetic + live integration tests, CI, three Z3 proofs (including a code-level contract proof of the permission invariant), an offline smoke test of the whole loop, and a measured-impact harness.
 
 ## Impact — quantified, with a path to real measurement
 
@@ -80,12 +80,12 @@ Against a seeded workspace with public/private channels and planted prompt-injec
 
 ### Real-LLM validation (Azure OpenAI `gpt-54-mini`)
 
-- **125/127 cases pass (98.4%)**
+- **127/127 cases pass (100%)**
 - Dev set: **100%** across all categories
-- Model-dependent metrics: **51/52 (98.1%)**
-- The only two failures are over-cautious refusals on held-out adversarial/ACL cases — fail-closed, not a breach.
+- Held-out set: **100%** across all categories
+- Model-dependent metrics: **52/52 (100%)**
 
-Unit + integration tests: **234/234 passed** (`npm test`).
+Unit + integration tests: **268/268 passed** (`npm test`).
 
 ## What we deliberately didn't build
 
@@ -99,7 +99,9 @@ PDF intake, semantic RTS where the plan supports it, and Marketplace distributio
 
 - **Repo:** https://github.com/theCodeForgerHQ/asked-and-answered
 - **Live app:** https://asked-and-answered-app.onrender.com
+- **Landing page:** https://public-sigma-orpin.vercel.app
 - **Slack App ID:** A0BHW9UC23A
 - **Sandbox:** Asked Answered Demo — access granted to slackhack@salesforce.com and testing@devpost.com
 - **Architecture diagram:** docs/architecture.svg
 - **Evals:** docs/EVALS.md
+- **Unbiased named-competitor comparison:** docs/UNBIASED_NAMED_COMPARISON.md

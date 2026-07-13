@@ -245,7 +245,7 @@ All V3 engineering modules are implemented and tested.
 
 | Dimension | Kept | Consensus | Arbiter | New A&A (v4) |
 |---|---|---|---|---|
-| **Tests** | ~325 | 132 | 66 | **234** |
+| **Tests** | ~325 | 132 | 66 | **268** |
 | **Eval size** | 42 + 52 | **58** | ~40 | **127** |
 | **Adversarial depth** | 7+ rounds | 9 patterns | 12 cases | **31 cases / 26 poison docs / 19+ patterns + non-vacuity** |
 | **Citation verification** | None explicit | Permalink-in-set | Prompt-based | **Deterministic snippet grounding** |
@@ -434,7 +434,7 @@ npx tsx scripts/runLoadBenchmark.ts  ✅ ~36,100 qps
 - SME-provided answers are confirmed by the SME; a second human must still approve.
 - Updated all tests, smoke, and integration suites.
 
-**Verification:** `npm test` ✅ 234/234; `npm run smoke` ✅ SMOKE PASS.
+**Verification:** `npm test` ✅ 268/268; `npm run smoke` ✅ SMOKE PASS.
 
 ### Phase 11 — Per-user OAuth for private-channel RTS ✅
 
@@ -447,7 +447,7 @@ npx tsx scripts/runLoadBenchmark.ts  ✅ ~36,100 qps
 - Added user scopes (`search:read`, `channels:read`, `groups:read`) and redirect URI to `slack/manifest.json`.
 - Added `tests/oauth.test.ts`.
 
-**Verification:** `npm test` ✅ 234/234.
+**Verification:** `npm test` ✅ 268/268.
 
 ### Phase 12 — Eval expansion to 127 cases with near-miss / delimiter-break patterns ✅
 

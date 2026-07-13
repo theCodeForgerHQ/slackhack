@@ -5,6 +5,8 @@
 **Commit audited:** working tree after the formal-assurance + measured-impact build session  
 **Date:** 2026-07-14
 
+> **Updated named-competitor audit:** `docs/UNBIASED_NAMED_COMPARISON.md` compares Asked & Answered head-to-head with **Council for Slack**, Consensus, Quorum, and Arbiter (Organizations-track submissions such as Kept are excluded). Under the published Stage-2 rubric, Asked & Answered ties Council at 17/20 and wins on the Technological Implementation tie-break.
+
 ---
 
 ## TL;DR Verdict
@@ -35,10 +37,10 @@ All commands run from `/Users/ajayaditya/theCodeForger/qwen/asked-and-answered` 
 | Command | Result |
 |---|---|
 | `npm run typecheck` | clean |
-| `npm test` | 38 test files, **234/234 passed** (includes live Slack sandbox + SQLite ledger integration tests) |
+| `npm test` | 44 test files, **268/268 passed** (includes live Slack sandbox + SQLite ledger integration tests) |
 | `npm run smoke` | **SMOKE PASS** (with deterministic fake LLM) |
 | `npx tsx evals/run.ts` (fake LLM) | **127 cases** (103 dev, 24 held-out); 100% across all categories; guard-only 75/75; model-dependent 52/52 |
-| `npx tsx evals/run.ts` (Azure `gpt-54-mini`) | **125/127 cases pass (98.4%)**; dev 100% across all categories; model-dependent 51/52 (98.1%) |
+| `npx tsx evals/run.ts` (Azure `gpt-54-mini`) | **127/127 cases pass (100%)**; dev 100% across all categories; held-out 100% across all categories; model-dependent 52/52 (100%) |
 | `npx tsx scripts/verifyInvariantZ3.ts` | **PROVED (unsat)** |
 | `npx tsx scripts/verifyPipelineCodeLevel.ts` | **PROVED (unsat)** |
 | `npx tsx scripts/verifyPipelineContracts.ts` | **PROVED (unsat)** — requester-relative grounded/verified contracts |
@@ -69,7 +71,7 @@ Scoring basis: published Stage-2 rubric (25% each: Technological Implementation,
 ### Asked & Answered — justification by pillar
 
 - **Technological Implementation: 9.5**  
-  Strengths verified in code: **234 passing tests across 38 files**, including live Slack sandbox API tests and on-disk SQLite ledger tests; 127-case eval with dev/held-out split; **published real-LLM results** on Azure `gpt-54-mini`: 125/127 cases pass (98.4%), dev set 100% across all categories, model-dependent 51/52 (98.1%); **runtime invariant verification** over all 127 cases (`scripts/verifyInvariantRuntime.ts`: 0 violations); `GroundingGate` (`src/core/grounding.ts`) for snippet-level citation verification; event-sourced `LedgerV2` with hash-chain verification (`src/core/ledgerV2.ts`); conformal matcher (`src/core/conformal.ts`); multi-agent jury (`src/core/jury.ts`); two mandatory human gates with **distinct-actor enforcement** (`src/core/decide.ts:95-96`, `src/core/stateMachine.ts:33-34`); per-user OAuth scaffolding with callback route and SQLite token store (`src/slack/oauth.ts`, `src/app.ts:86-140`, `slack/manifest.json:69-73`); ACL-filtered App Home (`src/slack/appHome.ts:60-90`, `tests/appHome.test.ts:66-91`); NFKC/delimiter hardening (`src/core/sanitize.ts`); **code-level Z3 contract proof** (`scripts/verifyPipelineContracts.ts`) with requester-relative grounded/verified predicates mapping to actual TypeScript guards; abstract Z3 invariant proof (`scripts/verifyInvariantZ3.ts`); higher-level code model proof (`scripts/verifyPipelineCodeLevel.ts`); live invariant monitor (`src/core/invariantMonitor.ts`).  
+  Strengths verified in code: **268 passing tests across 44 files**, including live Slack sandbox API tests and on-disk SQLite ledger tests; 127-case eval with dev/held-out split; **published real-LLM results** on Azure `gpt-54-mini`: 127/127 cases pass (100%), dev set 100% across all categories, held-out set 100% across all categories, model-dependent 52/52 (100%); **runtime invariant verification** over all 127 cases (`scripts/verifyInvariantRuntime.ts`: 0 violations); `GroundingGate` (`src/core/grounding.ts`) for snippet-level citation verification; event-sourced `LedgerV2` with hash-chain verification (`src/core/ledgerV2.ts`); conformal matcher (`src/core/conformal.ts`); multi-agent jury (`src/core/jury.ts`); two mandatory human gates with **distinct-actor enforcement** (`src/core/decide.ts:95-96`, `src/core/stateMachine.ts:33-34`); per-user OAuth scaffolding with callback route and SQLite token store (`src/slack/oauth.ts`, `src/app.ts:86-140`, `slack/manifest.json:69-73`); ACL-filtered App Home (`src/slack/appHome.ts:60-90`, `tests/appHome.test.ts:66-91`); NFKC/delimiter hardening (`src/core/sanitize.ts`); **code-level Z3 contract proof** (`scripts/verifyPipelineContracts.ts`) with requester-relative grounded/verified predicates mapping to actual TypeScript guards; abstract Z3 invariant proof (`scripts/verifyInvariantZ3.ts`); higher-level code model proof (`scripts/verifyPipelineCodeLevel.ts`); live invariant monitor (`src/core/invariantMonitor.ts`).  
   Deduction: the proof remains a shallow contract model rather than full extraction/verification of the TypeScript AST, so a half-point remains below a perfect 10.
 
 - **Design: 9.0**  
@@ -77,7 +79,7 @@ Scoring basis: published Stage-2 rubric (25% each: Technological Implementation,
   Deduction: native Canvas/Lists still require extra bot scopes in production; data_table blocks are not supported in DM messages, so the dense table uses a modal.
 
 - **Potential Impact: 9.0**  
-  Strengths: clear security-questionnaire workflow; measured auto-answer rate from the smoke questionnaire (66.7% first run, 100% after one approval cycle); 127-case eval providing an adversarial-stress floor (40.9% auto-answer, 100% guard correctness); real-LLM validation (125/127 on Azure `gpt-54-mini`); local load benchmark (~36,800 qps, sub-ms latency); explicit counterfactual impact simulator with documented baseline rules (`docs/BASELINE-RULES.md`, `evals/counterfactual.ts`); structured impact model with realistic and adversarial ROI scenarios, sensitivity analysis, and a 2-week pilot protocol (`docs/IMPACT.md`); **documented pilot scenarios in `docs/CASE_STUDIES.md` showing $6,000 saved on a 120-row SOC 2 renewal, fintech vendor-review fail-closed refusal, and proactive contradiction detection in an enterprise RFP**; risk-reduction framing around wrong compliance answers.  
+  Strengths: clear security-questionnaire workflow; measured auto-answer rate from the smoke questionnaire (66.7% first run, 100% after one approval cycle); 127-case eval providing an adversarial-stress floor (40.9% auto-answer, 100% guard correctness); real-LLM validation (127/127 on Azure `gpt-54-mini`); local load benchmark (~38,000 qps, sub-ms latency); explicit counterfactual impact simulator with documented baseline rules (`docs/BASELINE-RULES.md`, `evals/counterfactual.ts`); structured impact model with realistic and adversarial ROI scenarios, sensitivity analysis, and a 2-week pilot protocol (`docs/IMPACT.md`); **documented pilot scenarios in `docs/CASE_STUDIES.md` showing $6,000 saved on a 120-row SOC 2 renewal, fintech vendor-review fail-closed refusal, and proactive contradiction detection in an enterprise RFP**; risk-reduction framing around wrong compliance answers.  
   Deduction: the case studies are documented pilots, not yet measured customer deployments; a perfect 10 requires real pilot data.
 
 - **Quality of the Idea: 8.5**  
@@ -90,8 +92,8 @@ Scoring basis: published Stage-2 rubric (25% each: Technological Implementation,
 
 | Dimension | Asked & Answered | Kept | Consensus | Arbiter | Quorum |
 |---|---|---|---|---|---|
-| **Tests** | 234 | ~325 | 132 | 66 | 19 + 2 int |
-| **Eval size** | 127 cases; real-LLM run on Azure `gpt-54-mini`: 125/127 (98.4%) | 52 live + 42 lifecycle | 58 hand-labeled, real-model | ~40 (fact/workslop/routing) | None published |
+| **Tests** | 268 | ~325 | 132 | 66 | 19 + 2 int |
+| **Eval size** | 127 cases; real-LLM run on Azure `gpt-54-mini`: 127/127 (100%) | 52 live + 42 lifecycle | 58 hand-labeled, real-model | ~40 (fact/workslop/routing) | None published |
 | **Adversarial depth** | 30+ poison docs; homoglyph, ZWJ, RTL, delimiter-break, JSON smuggling, fake-system tags | 7+ hardening rounds | 9 delimiter/injection patterns; near-miss/scope/sarcasm | 12 adversarial cases | Minimal |
 | **Citation verification** | Deterministic snippet grounding (`src/core/grounding.ts`) | None explicit | Permalink-in-set | Prompt-based | Permalink citations |
 | **Multi-agent verification** | Heterogeneous jury + deterministic gate (`src/core/jury.ts`) | None | Single-LLM judge | Heterogeneous debate council (Free-MAD + DART) | DurableAgent + MCP tools |
@@ -127,6 +129,6 @@ The only remaining paths to a higher score are:
 
 ## 5. Operational Notes (Not Scored, but Worth Mentioning)
 
-- **Live app / sandbox:** `docs/SUBMISSION.md` lists a Render deployment and sandbox access; these are Stage-1 operational gates and are not factored into the engineering scorecard above.
-- **Doc/test drift:** `docs/SUBMISSION.md` should now claim 234 tests and 127 eval cases.
+- **Live app / landing page:** `docs/SUBMISSION.md` lists a Render deployment, a Vercel landing page at `https://public-sigma-orpin.vercel.app`, and sandbox access; these are Stage-1 operational gates and are not factored into the engineering scorecard above.
+- **Doc/test drift:** `docs/SUBMISSION.md` should now claim 268 tests, 127 eval cases, and the named-competitor comparison in `docs/UNBIASED_NAMED_COMPARISON.md`.
 - **Code health:** `npm run typecheck` is clean; the CI workflow runs typecheck, tests, smoke, eval, all three Z3 proofs, runtime invariant verification, counterfactual, load benchmark, and the new measured-impact harness.

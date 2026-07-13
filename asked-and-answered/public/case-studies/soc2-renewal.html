@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Case Study — SOC 2 Type II renewal · Asked &amp; Answered</title>
+    <style>
+      :root {
+        --bg: #0b0d14;
+        --surface: #12151f;
+        --surface-2: #1a1d29;
+        --text: #e8eaf0;
+        --muted: #9aa2b2;
+        --accent: #4f8cff;
+        --accent-2: #3bd0ee;
+        --danger: #ff6b6b;
+        --success: #5ee4a0;
+        --border: #252a3a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+      header { padding: 48px 0 24px; }
+      .back { display: inline-block; margin-bottom: 16px; font-size: 0.9rem; }
+      h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin: 0 0 16px; }
+      .lead { color: var(--muted); font-size: 1.15rem; margin-bottom: 32px; }
+      h2 { font-size: 1.25rem; margin: 40px 0 12px; color: var(--accent-2); }
+      p { margin: 0 0 16px; }
+      table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+      th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+      th { color: var(--muted); font-weight: 600; }
+      .highlight { color: var(--success); font-weight: 700; }
+      .quote {
+        background: var(--surface);
+        border-left: 3px solid var(--accent);
+        padding: 20px 24px;
+        margin: 28px 0;
+        border-radius: 0 12px 12px 0;
+        font-style: italic;
+        color: var(--muted);
+      }
+      footer { padding: 40px 0 64px; text-align: center; color: var(--muted); font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <a class="back" href="/case-studies/">← All case studies</a>
+        <h1>SOC 2 Type II renewal</h1>
+        <p class="lead">
+          A 250-person Series B SaaS company receives a 120-row SOC 2 Type II questionnaire from a major enterprise prospect.
+          The questionnaire is 80% identical to the one answered six months earlier.
+        </p>
+      </header>
+
+      <h2>Baseline cost</h2>
+      <p>
+        The security team assigns the questionnaire to a senior security engineer. At the documented baseline of 0.5 SME hours per question and $150/hr fully loaded:
+      </p>
+      <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td>Rows</td><td>120</td></tr>
+        <tr><td>SME hours</td><td>60</td></tr>
+        <tr><td>Direct cost</td><td>$9,000</td></tr>
+        <tr><td>Estimated uncited answers</td><td>30 (25%)</td></tr>
+        <tr><td>Estimated inconsistent answers vs. prior</td><td>18 (15%)</td></tr>
+      </table>
+
+      <h2>With Asked &amp; Answered</h2>
+      <p>
+        The compliance lead pastes the questionnaire into the Slack DM with Asked &amp; Answered. The agent deduplicates rows, searches workspace evidence, and returns:
+      </p>
+      <table>
+        <tr><th>Outcome</th><th>Value</th></tr>
+        <tr><td>Verified from the approved library</td><td>42 rows</td></tr>
+        <tr><td>Grounded from fresh workspace evidence</td><td>38 rows</td></tr>
+        <tr><td>Routed to SME</td><td>40 rows</td></tr>
+        <tr><td>SME hours consumed</td><td>20</td></tr>
+        <tr><td class="highlight">SME hours saved</td><td class="highlight">40</td></tr>
+        <tr><td class="highlight">Direct cost saved</td><td class="highlight">$6,000</td></tr>
+      </table>
+
+      <h2>How the product enforced the permission invariant</h2>
+      <p>
+        Every Verified answer was re-checked against the enterprise reviewer’s current channel membership before any text was returned. A previously approved answer whose evidence lived in a private engineering channel was automatically downgraded to Needs SME rather than leaked.
+      </p>
+
+      <div class="quote">
+        “The renewal questionnaire used to eat a full week of my senior engineer’s time. This time 80 rows were answered with citations before lunch, and we had an audit trail for every approval.”
+        <br/>— Head of Security (illustrative)
+      </div>
+
+      <footer>
+        This is a documented pilot scenario derived from the measured implementation. See <a href="/docs/IMPACT.md">IMPACT.md</a> for the 2-week protocol that replaces it with customer data.
+      </footer>
+    </div>
+  </body>
+</html>

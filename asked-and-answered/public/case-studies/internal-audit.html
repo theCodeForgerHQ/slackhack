@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Case Study — Internal audit · Asked &amp; Answered</title>
+    <style>
+      :root {
+        --bg: #0b0d14;
+        --surface: #12151f;
+        --surface-2: #1a1d29;
+        --text: #e8eaf0;
+        --muted: #9aa2b2;
+        --accent: #4f8cff;
+        --accent-2: #3bd0ee;
+        --danger: #ff6b6b;
+        --success: #5ee4a0;
+        --border: #252a3a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+      header { padding: 48px 0 24px; }
+      .back { display: inline-block; margin-bottom: 16px; font-size: 0.9rem; }
+      h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin: 0 0 16px; }
+      .lead { color: var(--muted); font-size: 1.15rem; margin-bottom: 32px; }
+      h2 { font-size: 1.25rem; margin: 40px 0 12px; color: var(--accent-2); }
+      p { margin: 0 0 16px; }
+      table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+      th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+      th { color: var(--muted); font-weight: 600; }
+      .highlight { color: var(--success); font-weight: 700; }
+      .quote {
+        background: var(--surface);
+        border-left: 3px solid var(--accent);
+        padding: 20px 24px;
+        margin: 28px 0;
+        border-radius: 0 12px 12px 0;
+        font-style: italic;
+        color: var(--muted);
+      }
+      footer { padding: 40px 0 64px; text-align: center; color: var(--muted); font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <a class="back" href="/case-studies/">← All case studies</a>
+        <h1>Internal audit spot-check</h1>
+        <p class="lead">
+          A compliance team needs to verify that 50 previously approved questionnaire answers are still accurate after a security policy update.
+        </p>
+      </header>
+
+      <h2>Manual baseline</h2>
+      <p>
+        An auditor manually re-checks each answer against Confluence, Jira, and Slack. At 0.5 hours per answer:
+      </p>
+      <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td>Answers to check</td><td>50</td></tr>
+        <tr><td>Auditor hours</td><td>25</td></tr>
+      </table>
+
+      <h2>With Asked &amp; Answered</h2>
+      <table>
+        <tr><th>Outcome</th><th>Value</th></tr>
+        <tr><td>Answers still verified</td><td>38</td></tr>
+        <tr><td>Flagged stale/contradicted</td><td>8</td></tr>
+        <tr><td>Missing current evidence</td><td>4</td></tr>
+        <tr><td class="highlight">Auditor hours saved</td><td class="highlight">~18</td></tr>
+      </table>
+
+      <h2>Signed audit trail</h2>
+      <p>
+        For each answer, the agent generated a signed Agent Run Card showing the original approver, approval timestamp, citations, and a SHA-256 signature over the run metadata. The auditor could verify that no answer had been tampered with since approval.
+      </p>
+
+      <div class="quote">
+        “I used to spend days spot-checking questionnaire answers. Now I get a prioritized list of what changed and a signature proving the rest is intact.”
+        <br/>— Internal Auditor (illustrative)
+      </div>
+
+      <footer>
+        This is a documented pilot scenario derived from the measured implementation. See <a href="/docs/IMPACT.md">IMPACT.md</a> for the 2-week protocol that replaces it with customer data.
+      </footer>
+    </div>
+  </body>
+</html>
