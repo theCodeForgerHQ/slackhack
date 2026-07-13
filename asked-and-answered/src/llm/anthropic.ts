@@ -18,7 +18,7 @@ export class AnthropicDrafter implements DraftingLlm {
   async draft(question: Question, hits: RtsHit[]): Promise<LlmDraft> {
     const message = await this.client.messages.create({
       model: MODEL,
-      max_tokens: 500,
+      max_tokens: 2000,
       messages: [{ role: 'user', content: buildDraftPrompt(question, hits) }],
     });
     const text = message.content

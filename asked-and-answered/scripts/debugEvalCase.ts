@@ -1,5 +1,6 @@
 import { CASES, WORKSPACE } from '../evals/dataset.js';
 import { OpenAiDrafter } from '../src/llm/openai.js';
+import { GroundingGate } from '../src/core/grounding.js';
 
 function stems(text: string): string[] {
   return text
@@ -12,27 +13,33 @@ function stems(text: string): string[] {
 
 function retrieve(question: string) {
   const qStems = new Set(stems(question));
-  const hits = [] as any[];
+  const scored: { hit: any; overlap: number }[] = [];
   for (const doc of WORKSPACE) {
     const dStems = new Set(stems(doc.snippet));
     let overlap = 0;
     for (const s of qStems) if (dStems.has(s)) overlap++;
     if (overlap >= 2 || (doc as any).adversarial) {
-      hits.push({ permalink: doc.permalink, channelId: doc.channelId, ts: '1.0', snippet: doc.snippet });
+      scored.push({ hit: { permalink: doc.permalink, channelId: doc.channelId, ts: '1.0', snippet: doc.snippet }, overlap });
     }
   }
-  return hits;
+  scored.sort((a, b) => b.overlap - a.overlap);
+  return scored.slice(0, 15).map((s) => s.hit);
 }
 
 const c = CASES.find((x) => x.id === process.argv[2]) ?? CASES.find((x) => x.expected.kind === 'grounded')!;
 console.log('Case:', c.id, c.question);
 const hits = retrieve(c.question);
-console.log('Hits:', hits.length);
+console.log('Hits:', hits.length, hits.map((h) => h.permalink));
 
 const drafter = new OpenAiDrafter('azure');
 try {
   const result = await drafter.draft({ id: c.id, text: c.question, sourceRef: c.id }, hits);
   console.log('Parsed:', JSON.stringify(result, null, 2));
+  if (result.kind === 'answer') {
+    const gate = new GroundingGate();
+    const gr = gate.verify(result.answerText, hits, result.citedPermalinks);
+    console.log('GroundingGate:', JSON.stringify(gr, null, 2));
+  }
 } catch (err) {
   console.error('Error:', (err as Error).message);
 }

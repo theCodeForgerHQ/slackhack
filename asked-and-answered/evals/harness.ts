@@ -65,18 +65,21 @@ function stems(text: string): string[] {
 /** Deterministic keyword retrieval over the seeded workspace (models RTS keyword mode). */
 function retrieve(question: string): RtsHit[] {
   const qStems = new Set(stems(question));
-  const hits: RtsHit[] = [];
+  const scored: { hit: RtsHit; overlap: number }[] = [];
   for (const doc of WORKSPACE) {
     const dStems = new Set(stems(doc.snippet));
     let overlap = 0;
     for (const s of qStems) if (dStems.has(s)) overlap++;
-    // Adversarial docs are present in the workspace and always surface, so
-    // the pipeline's guards — not retrieval — must neutralize them.
+    // Adversarial docs are present in the workspace and must surface when
+    // relevant so the pipeline's guards — not retrieval — neutralize them.
     if (overlap >= 2 || doc.adversarial) {
-      hits.push({ permalink: doc.permalink, channelId: doc.channelId, ts: '1.0', snippet: doc.snippet });
+      scored.push({ hit: { permalink: doc.permalink, channelId: doc.channelId, ts: '1.0', snippet: doc.snippet }, overlap });
     }
   }
-  return hits;
+  // Keep the most relevant hits so real-LLM evals stay inside context windows.
+  scored.sort((a, b) => b.overlap - a.overlap);
+  const MAX_HITS = 15;
+  return scored.slice(0, MAX_HITS).map((s) => s.hit);
 }
 
 function visibilityFor(): VisibilityChecker {
@@ -138,10 +141,11 @@ const refuserLlm: DraftingLlm = {
   },
 };
 
-export async function runEval(llm: DraftingLlm = fakeLlm): Promise<EvalReport> {
+export async function runEval(llm: DraftingLlm = fakeLlm, caseIds?: string[]): Promise<EvalReport> {
   const cases: CaseResult[] = [];
+  const casesToRun = caseIds ? CASES.filter((c) => caseIds.includes(c.id)) : CASES;
 
-  for (const c of CASES) {
+  for (const c of casesToRun) {
     const graph = new EvidenceGraph();
     const library = AnswerLibrary.inMemory(graph);
     if (c.seedApproved) {
@@ -216,17 +220,17 @@ export async function runEval(llm: DraftingLlm = fakeLlm): Promise<EvalReport> {
     };
   }
 
-  const devCases = CASES.filter((c) => !isHeldOut(c));
-  const heldOutCases = CASES.filter((c) => isHeldOut(c));
+  const devCases = casesToRun.filter((c) => !isHeldOut(c));
+  const heldOutCases = casesToRun.filter((c) => isHeldOut(c));
 
   const devMetrics = metricsFor(devCases);
   const heldOutMetrics = metricsFor(heldOutCases);
 
   // Guard-only metrics: every metric except grounded recall is enforced by the
   // deterministic pipeline, independent of which LLM drafts.
-  const guardOnlyCases = CASES.filter((c) => c.expected.kind !== 'grounded');
+  const guardOnlyCases = casesToRun.filter((c) => c.expected.kind !== 'grounded');
   const guardOnlyHit = cases.filter((r) => guardOnlyCases.some((c) => c.id === r.id) && r.pass).length;
-  const modelDependentCases = CASES.filter((c) => c.expected.kind === 'grounded');
+  const modelDependentCases = casesToRun.filter((c) => c.expected.kind === 'grounded');
   const modelDependentHit = cases.filter((r) => modelDependentCases.some((c) => c.id === r.id) && r.pass).length;
   const pct = (hit: number, of: number) => (of === 0 ? 100 : Math.round((hit / of) * 1000) / 10);
 

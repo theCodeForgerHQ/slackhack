@@ -117,6 +117,12 @@ export function reviewTableBlocks(
       value: actionValue(runId, 'export'),
       text: { type: 'plain_text', text: 'Export Canvas' },
     },
+    {
+      type: 'button',
+      action_id: 'export_list',
+      value: actionValue(runId, 'export'),
+      text: { type: 'plain_text', text: 'Export List' },
+    },
   ];
   if (hasNext) {
     toolbar.unshift({

@@ -19,5 +19,9 @@ jobs:
       - run: npm run smoke
       - run: npx tsx evals/run.ts
       - run: npx tsx scripts/verifyInvariantZ3.ts
+      - run: npx tsx scripts/verifyPipelineCodeLevel.ts
+      - run: npx tsx scripts/verifyPipelineContracts.ts
+      - run: npx tsx scripts/verifyInvariantRuntime.ts
       - run: npx tsx scripts/runCounterfactual.ts
       - run: npx tsx scripts/runLoadBenchmark.ts
+      - run: npx tsx scripts/measureImpact.ts

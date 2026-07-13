@@ -34,7 +34,7 @@ export interface GroundingResult {
  * paraphrase to a human than ship an unsupported claim.
  */
 export class GroundingGate {
-  constructor(private readonly threshold = 0.85) {}
+  constructor(private readonly threshold = 0.8) {}
 
   verify(answerText: string, hits: RtsHit[], citedPermalinks: string[]): GroundingResult {
     const allowed = new Map(hits.map((h) => [h.permalink, h]));

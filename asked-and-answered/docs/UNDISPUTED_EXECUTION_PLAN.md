@@ -245,7 +245,7 @@ All V3 engineering modules are implemented and tested.
 
 | Dimension | Kept | Consensus | Arbiter | New A&A (v4) |
 |---|---|---|---|---|
-| **Tests** | ~325 | 132 | 66 | **214** |
+| **Tests** | ~325 | 132 | 66 | **234** |
 | **Eval size** | 42 + 52 | **58** | ~40 | **127** |
 | **Adversarial depth** | 7+ rounds | 9 patterns | 12 cases | **31 cases / 26 poison docs / 19+ patterns + non-vacuity** |
 | **Citation verification** | None explicit | Permalink-in-set | Prompt-based | **Deterministic snippet grounding** |
@@ -343,7 +343,7 @@ npx tsx evals/run.ts ✅ 60 cases, 100% across all metrics
 npm run typecheck                 ✅ clean
 npm test                          ✅ 167/167 passed
 npm run smoke                     ✅ SMOKE PASS
-npx tsx evals/run.ts              ✅ 120 cases, 100% across all metrics
+npx tsx evals/run.ts              ✅ 127 cases, 100% across all categories
 npx tsx scripts/runCounterfactual.ts ✅ 37.5 hrs / $5,625 saved
 npx tsx scripts/runLoadBenchmark.ts  ✅ ~33,800 qps
 ```
@@ -377,7 +377,7 @@ Invariant is entailed by RETURN-GUARD + CHECKER-SOUND.
 npm run typecheck                 ✅ clean
 npm test                          ✅ 168/168 passed
 npm run smoke                     ✅ SMOKE PASS
-npx tsx evals/run.ts              ✅ 120 cases, 100% across all metrics
+npx tsx evals/run.ts              ✅ 127 cases, 100% across all categories
 npx tsx scripts/verifyInvariantZ3.ts ✅ PROVED
 ```
 
@@ -413,7 +413,7 @@ npx tsx scripts/verifyInvariantZ3.ts ✅ PROVED
 npm run typecheck                 ✅ clean
 npm test                          ✅ 187/187 passed
 npm run smoke                     ✅ SMOKE PASS
-npx tsx evals/run.ts              ✅ 120 cases, 100% across all metrics
+npx tsx evals/run.ts              ✅ 127 cases, 100% across all categories
 npx tsx scripts/verifyInvariantZ3.ts ✅ PROVED
 npx tsx scripts/runCounterfactual.ts ✅ 37.5 hrs / $5,625 saved
 npx tsx scripts/runLoadBenchmark.ts  ✅ ~36,100 qps
@@ -434,7 +434,7 @@ npx tsx scripts/runLoadBenchmark.ts  ✅ ~36,100 qps
 - SME-provided answers are confirmed by the SME; a second human must still approve.
 - Updated all tests, smoke, and integration suites.
 
-**Verification:** `npm test` ✅ 214/214; `npm run smoke` ✅ SMOKE PASS.
+**Verification:** `npm test` ✅ 234/234; `npm run smoke` ✅ SMOKE PASS.
 
 ### Phase 11 — Per-user OAuth for private-channel RTS ✅
 
@@ -447,7 +447,7 @@ npx tsx scripts/runLoadBenchmark.ts  ✅ ~36,100 qps
 - Added user scopes (`search:read`, `channels:read`, `groups:read`) and redirect URI to `slack/manifest.json`.
 - Added `tests/oauth.test.ts`.
 
-**Verification:** `npm test` ✅ 214/214.
+**Verification:** `npm test` ✅ 234/234.
 
 ### Phase 12 — Eval expansion to 127 cases with near-miss / delimiter-break patterns ✅
 

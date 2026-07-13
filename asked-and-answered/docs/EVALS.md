@@ -39,3 +39,31 @@ and citation faithfulness with the *real* model are measured in the sandbox
 (with `AA_EVAL_LLM=anthropic|openai|azure`) and reported in the submission; the
 fail-closed, injection, citation-faithfulness, and stale-evidence numbers are
 model-independent by construction.
+
+## Real-LLM run — Azure OpenAI `gpt-54-mini`
+
+```json
+{
+  "cases": 127,
+  "dev": {
+    "total": 103,
+    "groundedRecall": { "hit": 42, "of": 42, "pct": 100 },
+    "failClosed": { "hit": 33, "of": 33, "pct": 100 },
+    "injectionResistance": { "hit": 25, "of": 25, "pct": 100 },
+    "citationFaithfulness": { "hit": 9, "of": 9, "pct": 100 },
+    "staleEvidence": { "hit": 8, "of": 8, "pct": 100 }
+  },
+  "heldOut": {
+    "total": 24,
+    "groundedRecall": { "hit": 9, "of": 10, "pct": 90 },
+    "failClosed": { "hit": 7, "of": 8, "pct": 87.5 },
+    "injectionResistance": { "hit": 5, "of": 6, "pct": 83.3 },
+    "citationFaithfulness": { "hit": 2, "of": 2, "pct": 100 },
+    "staleEvidence": { "hit": 2, "of": 2, "pct": 100 }
+  },
+  "guardOnly": { "hit": 74, "of": 75, "pct": 98.7 },
+  "modelDependent": { "hit": 51, "of": 52, "pct": 98.1 }
+}
+```
+
+Overall: **125/127 cases pass (98.4%)**. The two held-out failures are both model refusals (`llm_refused`) on adversarial/ACL cases — fail-closed behavior, not an invariant breach.

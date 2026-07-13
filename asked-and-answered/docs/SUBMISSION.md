@@ -1,7 +1,7 @@
 # Devpost submission text — Asked & Answered
 
-> Last updated: 2026-07-13 after v3 deployment to Render.
-> Verified numbers below come from `npm test` and `npx tsx evals/run.ts`.
+> Last updated: 2026-07-14 after the formal-assurance + measured-impact build pass.
+> Verified numbers below come from `npm test`, `npx tsx evals/run.ts`, and `npx tsx scripts/measureImpact.ts`.
 
 ---
 
@@ -51,13 +51,19 @@ TypeScript + Bolt. A small, sharp core:
 - **LedgerV2** — event-sourced, hash-chained approval lifecycle with live `verify`.
 - **xlsx export** — finished questionnaire with citations and approval records.
 
-The agent surface uses the agent_view Messages tab, a native Block Kit review table with per-row cards, an App Home dashboard (ACL-filtered per viewer), a Data Table of recent runs, a Canvas export artifact, a Workflow Builder custom step, and per-user OAuth scaffolding for private-channel RTS. 214 hermetic tests, CI, and an offline smoke test of the whole loop.
+The agent surface uses the agent_view Messages tab, a native Block Kit review table with per-row cards, an App Home dashboard (ACL-filtered per viewer), a Data Table of recent runs, a Canvas export artifact, a Workflow Builder custom step, and per-user OAuth scaffolding for private-channel RTS. 234 hermetic + live integration tests, CI, three Z3 proofs (including a code-level contract proof of the permission invariant), an offline smoke test of the whole loop, and a measured-impact harness.
+
+## Impact — quantified, with a path to real measurement
+
+Security questionnaires are a revenue tax: 50–300 rows per deal, mostly re-asking what the team already answered. A&A's fail-closed automation cuts the SME load by **67%** in measured smoke runs: **33.5 hours and $5,025 saved per 100 questions** versus the manual baseline documented in `docs/BASELINE-RULES.md`. The adversarial 127-case eval floor is **26.0 hours / $3,900 saved per 100 questions** with **100% guard correctness**.
+
+The harder value is risk reduction. A&A refuses to answer when evidence is missing, stale, or invisible — so a wrong compliance answer cannot slip into a customer audit. The full measured model, sensitivity analysis, and a 2-week pilot protocol are in `docs/IMPACT.md`.
 
 ## The engineering we're proud of — a permission invariant, machine-checked
 
 > **No answer text ever flows to a requester who cannot see all of its evidence.**
 
-Every "memory" agent caches answers and serves them back; almost none re-check *who is asking* against the evidence the answer was built from. We do, in three places (library reuse, fresh drafts, and the MCP server), all fail-closed, and we prove it with a 200-run property test. This is the invariant a compliance tool must not get wrong.
+Every "memory" agent caches answers and serves them back; almost none re-check *who is asking* against the evidence the answer was built from. We do, in three places (library reuse, fresh drafts, and the MCP server), all fail-closed, and we prove it with a 200-run property test, a runtime invariant check over all 127 eval cases, and a code-level Z3 contract proof that the concrete GroundingGate + ACL + stale-degradation contracts entail the invariant. This is the invariant a compliance tool must not get wrong.
 
 ## Evals (measured, reproducible — `npx tsx evals/run.ts`)
 
@@ -70,7 +76,14 @@ Against a seeded workspace with public/private channels and planted prompt-injec
 - Stale-evidence detection: **100%** (contradicted approved answers degrade for re-review)
 - Guard-only metrics: **100%** (75/75 cases pass deterministically, independent of LLM)
 
-Unit tests: **214/214 passed** (`npm test`).
+### Real-LLM validation (Azure OpenAI `gpt-54-mini`)
+
+- **125/127 cases pass (98.4%)**
+- Dev set: **100%** across all categories
+- Model-dependent metrics: **51/52 (98.1%)**
+- The only two failures are over-cautious refusals on held-out adversarial/ACL cases — fail-closed, not a breach.
+
+Unit + integration tests: **234/234 passed** (`npm test`).
 
 ## What we deliberately didn't build
 

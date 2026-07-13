@@ -72,4 +72,12 @@ describeOrSkip('Live Slack sandbox API integration', () => {
       }),
     ).rejects.toThrow(/missing_scope/);
   });
+
+  test('Lists API returns missing_scope because bot token lacks lists:write', async () => {
+    await expect(
+      client.apiCall('lists.create', {
+        title: 'Integration test list',
+      }),
+    ).rejects.toThrow(/missing_scope/);
+  });
 });

@@ -48,7 +48,7 @@ export class OpenAiDrafter implements DraftingLlm {
   async draft(question: Question, hits: RtsHit[]): Promise<LlmDraft> {
     const body = {
       model: this.model,
-      max_completion_tokens: 500,
+      max_completion_tokens: 2000,
       messages: [{ role: 'user', content: buildDraftPrompt(question, hits) }],
     };
 

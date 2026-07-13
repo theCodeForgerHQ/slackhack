@@ -21,6 +21,7 @@ import { appHomeBlocks, gatherHomeStats } from './slack/appHome.js';
 import { reviewModalView } from './slack/dataTable.js';
 import { buildCanvasDocument } from './slack/canvasExport.js';
 import { createCanvasOrFallback } from './slack/canvasCreate.js';
+import { exportToSlackList } from './slack/listsExport.js';
 import { registerWorkflowStep } from './slack/workflowStep.js';
 import { verifyPipelineCodeLevel } from '../scripts/verifyPipelineCodeLevel.js';
 import { runQuestionnaire, ReviewSession, type RunDeps } from './slack/flows.js';
@@ -750,6 +751,30 @@ app.action('export_canvas', async ({ ack, body, client, action }) => {
     });
   } catch (err) {
     if (t) await client.chat.postMessage({ channel: t.channel, thread_ts: t.thread, text: `Canvas export failed: ${(err as Error).message}` });
+  }
+});
+
+app.action('export_list', async ({ ack, body, client, action }) => {
+  await ack();
+  const t = target(body);
+  try {
+    const actorUserId = (body as { user?: { id?: string } }).user?.id ?? 'unknown';
+    const resolved = sessionForValue((action as { value?: string }).value, actorUserId);
+    if (!resolved || !t) return;
+    const result = await exportToSlackList(client, resolved.session.results, {
+      runId: resolved.session.runId,
+      requesterId: resolved.session.requesterId,
+      title: 'Questionnaire — Asked & Answered',
+    });
+    await client.chat.postMessage({
+      channel: t.channel,
+      thread_ts: t.thread,
+      text: result.ok
+        ? `:clipboard: Exported to Slack List${result.listId ? ` (ID \`${result.listId}\`)` : ''}.`
+        : `:warning: Slack List export unavailable (${result.fallbackReason}). Try Export xlsx or Canvas.`,
+    });
+  } catch (err) {
+    if (t) await client.chat.postMessage({ channel: t.channel, thread_ts: t.thread, text: `List export failed: ${(err as Error).message}` });
   }
 });
 
