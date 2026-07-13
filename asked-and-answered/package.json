@@ -1,0 +1,37 @@
+{
+  "name": "asked-and-answered",
+  "version": "0.1.0",
+  "description": "Slack-native agent that turns your team's Slack history into completed security questionnaires — evidence-cited, SME-approved, fail-closed.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/app.ts",
+    "build": "tsc",
+    "start": "node dist/src/app.js",
+    "mcp": "tsx src/mcp/server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.62.0",
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "@slack/bolt": "^4.4.0",
+    "better-sqlite3": "^12.2.0",
+    "exceljs": "^4.4.0",
+    "tsx": "^4.20.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.0",
+    "fast-check": "^4.2.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0",
+    "z3-solver": "^4.16.0"
+  }
+}

@@ -1,0 +1,34 @@
+# fly.toml — Kept (Slack Agent) on Fly.io
+# Single always-on Node process (tsx) serving Slack events, OAuth install,
+# provider webhooks, the trust page, and /healthz on one port. Fly gives a
+# managed HTTPS URL (https://<app>.fly.dev) with a valid cert — no domain needed.
+#
+# `app` must be globally unique — `flyctl launch --name <you> --region bom` sets it.
+app = "kept-slack-agent"
+primary_region = "sin"   # Singapore — bom (Mumbai) lacked volume capacity; sin is nearest well-provisioned region
+
+# Fly builds from the repo's Dockerfile automatically.
+[build]
+
+[env]
+  PORT = "8080"
+  NODE_ENV = "production"
+  KEPT_PROOF_TARGETS_FILE = "/app/proof-targets.json"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false      # always-on so Slack events/OAuth are never missed
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "25s"          # allow Postgres init + scheduler start on boot
+    interval = "15s"
+    method = "get"
+    path = "/healthz"
+    timeout = "4s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"                # plenty for hackathon scale; bump to 1gb if needed

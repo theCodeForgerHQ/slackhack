@@ -1,0 +1,44 @@
+{
+ "query": "Subriel Matias",
+ "fetched_at": "2026-06-09T18:54:52.098608+00:00",
+ "source": "boxing-data-api.p.rapidapi.com /v2/fighters/?name=",
+ "note": "REAL recorded API response (not mock), captured 2026-06-09 for demo fallback",
+ "data": [
+  {
+   "id": "6715fc1faf69bb50508b7b53",
+   "name": "Subriel Matias",
+   "alias": "El Orgullo de Maternillo",
+   "gender": "m",
+   "age": 33,
+   "height": "5' 8\" / 173 cm",
+   "height_ft": "5'8\"",
+   "height_cm": 173.0,
+   "height_in": 68.11,
+   "nationality": "Puerto Rico",
+   "nationality_code": "PR",
+   "nickname": null,
+   "reach": "71.7\" / 182 cm",
+   "reach_cm": 180.0,
+   "reach_in": 71.0,
+   "stance": "orthodox",
+   "stats": {
+    "wins": 23,
+    "losses": 2,
+    "draws": 0,
+    "total_bouts": 24,
+    "ko_percentage": 91,
+    "ko_wins": 20,
+    "stopped": 0
+   },
+   "debut": "2015",
+   "division": {
+    "id": "671513530ad13034eb882653",
+    "name": "Super Lightweight",
+    "weight_lb": 140.0,
+    "weight_kg": 63.5
+   },
+   "titles": [],
+   "updated_at": "2026-03-31T18:59:58.249000"
+  }
+ ]
+}

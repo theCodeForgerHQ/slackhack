@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<style>
+  html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; }
+  body {
+    background: #0b1220; color: #e6edf3;
+    font: 400 24px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { width: 1640px; margin: 0 auto; padding: 48px 0 0; }
+  header { text-align: center; margin-bottom: 30px; }
+  header h1 { font-size: 60px; font-weight: 800; margin: 0 0 10px; letter-spacing: -0.01em; }
+  header p { font-size: 28px; color: #9fb3c8; margin: 0; }
+  header b { color: #7ee2b8; }
+  .flow { display: grid; grid-template-columns: 1fr 300px; gap: 28px; align-items: stretch; }
+  .lanes { display: flex; flex-direction: column; gap: 16px; }
+  .lane {
+    background: #111a2b; border: 1px solid #1d2a44; border-radius: 18px; padding: 20px 26px;
+    display: flex; align-items: center; gap: 26px;
+  }
+  .lane .label {
+    min-width: 230px; font-size: 22px; font-weight: 700; color: #9fb3c8;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 12px; }
+  .chip {
+    background: #0b1220; border: 1px solid #24314f; border-radius: 11px; padding: 11px 18px;
+    font-size: 24px; color: #e6edf3;
+  }
+  .chip.accent { border-color: #2f6f46; color: #7ee2b8; font-weight: 700; }
+  .chip.muted { color: #9fb3c8; }
+  .arrow { text-align: center; color: #3a4a6a; font-size: 26px; line-height: 1; margin: -8px 0; }
+  .gate {
+    background: #1c1430; border-color: #3a2a5a; color: #c8b6f0;
+  }
+  /* right-side neurosymbolic bracket */
+  .brace { display: flex; flex-direction: column; gap: 16px; }
+  .group {
+    border: 2px dashed #2a3a5c; border-radius: 18px; padding: 22px; display: flex;
+    flex-direction: column; justify-content: center; text-align: center;
+  }
+  .group .g-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+  .group .g-sub { font-size: 20px; color: #9fb3c8; }
+  .group.perceive { flex: 2.7 1 0; border-color: #2a4a6c; }
+  .group.perceive .g-title { color: #58a6ff; }
+  .group.decide { flex: 1.15 1 0; border-color: #2f6f46; }
+  .group.decide .g-title { color: #3fb950; }
+  footer { text-align: center; margin-top: 26px; color: #7d8aa0; font-size: 22px; }
+  footer b { color: #9fb3c8; }
+</style></head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>How CornerCheck works</h1>
+      <p>The language model perceives and orchestrates. A <b>proven symbolic core</b> decides clearance.</p>
+    </header>
+
+    <div class="flow">
+      <div class="lanes">
+        <div class="lane">
+          <div class="label">You, in Slack</div>
+          <div class="chips"><span class="chip muted">"Is this fighter cleared to compete?"</span></div>
+        </div>
+        <div class="arrow">&#9660;</div>
+
+        <div class="lane">
+          <div class="label">Slack surfaces</div>
+          <div class="chips">
+            <span class="chip">Assistant pane</span>
+            <span class="chip">Block Kit cards &middot; whole-card board</span>
+            <span class="chip">Workflow Builder step</span>
+            <span class="chip">Real-Time Search (injury signal)</span>
+            <span class="chip">Canvas (audit export)</span>
+            <span class="chip">Incoming Webhooks (ops digest)</span>
+          </div>
+        </div>
+        <div class="arrow">&#9660;</div>
+
+        <div class="lane">
+          <div class="label">Agent</div>
+          <div class="chips">
+            <span class="chip">Claude Agent SDK</span>
+            <span class="chip">MCP server: resolve &middot; rules &middot; ledger</span>
+            <span class="chip gate">fail-closed gate</span>
+          </div>
+        </div>
+        <div class="arrow">&#9660;</div>
+
+        <div class="lane">
+          <div class="label">Symbolic core (decides)</div>
+          <div class="chips">
+            <span class="chip">Entity resolution</span>
+            <span class="chip accent">Conformal identity gate &#10003;</span>
+            <span class="chip">Rule engine (YAML)</span>
+            <span class="chip accent">Z3-verified &#10003;</span>
+            <span class="chip">Live corroboration (tighten-only)</span>
+            <span class="chip">Roster monitor (daily)</span>
+            <span class="chip">HMAC hash-chain ledger</span>
+            <span class="chip muted">Postgres</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="brace">
+        <div class="group perceive">
+          <div class="g-title">Neuro</div>
+          <div class="g-sub">perceives &amp; orchestrates</div>
+        </div>
+        <div class="group decide">
+          <div class="g-title">Symbolic</div>
+          <div class="g-sub">decides, and is formally proven fail-closed</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>Decision support: a human always makes the final call &nbsp;·&nbsp; deployed on <b>Render</b> &nbsp;·&nbsp; the public dashboard runs the same <b>Z3 proof</b> live</footer>
+  </div>
+</body></html>

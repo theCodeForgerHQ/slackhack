@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 720" font-family="Inter, Segoe UI, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#5b6478"/>
+    </marker>
+    <style>
+      .box{rx:10;stroke-width:1.5;}
+      .lbl{font-size:14px;font-weight:600;fill:#f4f6fb;}
+      .sub{font-size:10px;fill:#c3cad9;}
+      .tech{font-size:10px;font-weight:700;}
+      .edge{stroke:#5b6478;stroke-width:1.5;fill:none;marker-end:url(#arrow);}
+      .note{font-size:10px;fill:#8a93a6;}
+      .title{font-size:22px;font-weight:800;fill:#f4f6fb;}
+      .invariant{font-size:12px;font-weight:700;fill:#ffd166;}
+    </style>
+  </defs>
+
+  <rect width="1040" height="720" fill="#12141c"/>
+  <text x="32" y="40" class="title">Asked &amp; Answered — architecture v3</text>
+  <text x="32" y="62" class="note">Slack agent · RTS-grounded · jury-drafted · deterministically verified · tamper-evident</text>
+
+  <!-- Slack surface -->
+  <rect x="340" y="84" width="360" height="56" class="box" fill="#2b1d4d" stroke="#7c5cff"/>
+  <text x="520" y="108" text-anchor="middle" class="lbl">Slack — agent_view Messages tab</text>
+  <text x="520" y="126" text-anchor="middle" class="sub">upload xlsx/csv · streamed plan · Block Kit review table · /aa verify</text>
+  <text x="712" y="112" class="tech" fill="#7c5cff">Slack AI</text>
+
+  <!-- app.ts -->
+  <rect x="420" y="166" width="200" height="48" class="box" fill="#1c2740" stroke="#3d5a99"/>
+  <text x="520" y="188" text-anchor="middle" class="lbl">app.ts (Bolt)</text>
+  <text x="520" y="204" text-anchor="middle" class="sub">listeners · actions · SME routing</text>
+  <line x1="520" y1="140" x2="520" y2="166" class="edge"/>
+
+  <!-- Core row -->
+  <g>
+    <rect x="32" y="262" width="130" height="62" class="box" fill="#1c2740" stroke="#3d5a99"/>
+    <text x="97" y="285" text-anchor="middle" class="lbl">parse.ts</text>
+    <text x="97" y="302" text-anchor="middle" class="sub">xlsx/csv/text</text>
+    <text x="97" y="315" text-anchor="middle" class="sub">→ dedup questions</text>
+
+    <rect x="174" y="262" width="148" height="62" class="box" fill="#1c2740" stroke="#3d5a99"/>
+    <text x="248" y="285" text-anchor="middle" class="lbl">QueryPlanner</text>
+    <text x="248" y="302" text-anchor="middle" class="sub">RateBudget 10/min</text>
+    <text x="248" y="315" text-anchor="middle" class="sub">per-question · OR-batch</text>
+
+    <rect x="336" y="262" width="128" height="62" class="box" fill="#3a2118" stroke="#e07a3d"/>
+    <text x="400" y="285" text-anchor="middle" class="lbl">Jury</text>
+    <text x="400" y="302" text-anchor="middle" class="sub">multi-agent panel</text>
+    <text x="400" y="315" text-anchor="middle" class="sub">heterogeneous providers</text>
+
+    <rect x="476" y="262" width="144" height="62" class="box" fill="#3a2118" stroke="#e07a3d"/>
+    <text x="548" y="285" text-anchor="middle" class="lbl">DraftingPipeline</text>
+    <text x="548" y="302" text-anchor="middle" class="sub">Verified · Grounded</text>
+    <text x="548" y="315" text-anchor="middle" class="sub">· Needs SME (fail-closed)</text>
+
+    <rect x="636" y="262" width="148" height="62" class="box" fill="#14342a" stroke="#3fae7f"/>
+    <text x="710" y="285" text-anchor="middle" class="lbl">AnswerLibrary</text>
+    <text x="710" y="302" text-anchor="middle" class="sub">approved answers +</text>
+    <text x="710" y="315" text-anchor="middle" class="sub">ACL revalidation</text>
+
+    <rect x="800" y="262" width="140" height="62" class="box" fill="#14342a" stroke="#3fae7f"/>
+    <text x="870" y="285" text-anchor="middle" class="lbl">LedgerV2</text>
+    <text x="870" y="302" text-anchor="middle" class="sub">event-sourced</text>
+    <text x="870" y="315" text-anchor="middle" class="sub">hash-chained lifecycle</text>
+  </g>
+
+  <line x1="480" y1="214" x2="130" y2="262" class="edge"/>
+  <line x1="500" y1="214" x2="270" y2="262" class="edge"/>
+  <line x1="520" y1="214" x2="400" y2="262" class="edge"/>
+  <line x1="540" y1="214" x2="548" y2="262" class="edge"/>
+  <line x1="560" y1="214" x2="710" y2="262" class="edge"/>
+  <line x1="580" y1="214" x2="870" y2="262" class="edge"/>
+
+  <!-- Second row -->
+  <g>
+    <rect x="148" y="380" width="210" height="54" class="box" fill="#22183a" stroke="#7c5cff"/>
+    <text x="253" y="402" text-anchor="middle" class="lbl">Real-Time Search API</text>
+    <text x="253" y="418" text-anchor="middle" class="sub">assistant.search.context</text>
+    <text x="320" y="388" class="tech" fill="#7c5cff">RTS</text>
+    <line x1="253" y1="324" x2="253" y2="380" class="edge"/>
+
+    <rect x="372" y="380" width="158" height="54" class="box" fill="#3a2118" stroke="#e07a3d"/>
+    <text x="451" y="402" text-anchor="middle" class="lbl">GroundingGate</text>
+    <text x="451" y="418" text-anchor="middle" class="sub">snippet-level verification</text>
+    <line x1="451" y1="324" x2="451" y2="380" class="edge"/>
+
+    <rect x="546" y="380" width="158" height="54" class="box" fill="#1c2740" stroke="#3d5a99"/>
+    <text x="625" y="402" text-anchor="middle" class="lbl">EvidenceGraph</text>
+    <text x="625" y="418" text-anchor="middle" class="sub">SUPPORTS · CONTRADICTS · SUPERSEDES</text>
+    <line x1="710" y1="324" x2="640" y2="380" class="edge"/>
+
+    <rect x="720" y="380" width="158" height="54" class="box" fill="#1c2740" stroke="#3d5a99"/>
+    <text x="799" y="402" text-anchor="middle" class="lbl">ConformalMatcher</text>
+    <text x="799" y="418" text-anchor="middle" class="sub">calibrated singleton matches</text>
+    <line x1="710" y1="324" x2="790" y2="380" class="edge"/>
+  </g>
+
+  <!-- MCP -->
+  <rect x="546" y="476" width="430" height="54" class="box" fill="#22183a" stroke="#7c5cff"/>
+  <text x="761" y="498" text-anchor="middle" class="lbl">asked-answered-mcp (read-only + human-gated propose_answer)</text>
+  <text x="761" y="516" text-anchor="middle" class="sub">search_answers · get_answer_provenance · propose_answer (pending approval)</text>
+  <text x="956" y="488" class="tech" fill="#7c5cff">MCP</text>
+  <line x1="870" y1="324" x2="830" y2="476" class="edge"/>
+
+  <!-- Invariant banner -->
+  <rect x="140" y="568" width="760" height="52" rx="10" fill="#241f10" stroke="#ffd166"/>
+  <text x="520" y="592" text-anchor="middle" class="invariant">Invariant: no answer text ever flows to a requester who cannot see all of its evidence</text>
+  <text x="520" y="610" text-anchor="middle" class="note">enforced in library reuse · fresh drafts · MCP · all fail-closed · property-tested (200 runs)</text>
+
+  <text x="32" y="668" class="note">Zero-copy: library stores permalink pointers, ledger stores keyed hashes — never Slack content. Deterministic grounding catches fabricated citations.</text>
+</svg>

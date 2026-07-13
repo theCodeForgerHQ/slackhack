@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+env/
+
+# Build output
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+*.local
+*.local.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs & DBs
+*.log
+*.db
+*.db-journal
+
+# Large generated assets
+*.mp4

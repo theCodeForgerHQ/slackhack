@@ -1,0 +1,27 @@
+# Baseline competition suspension windows (MINIMUM days; the longest applicable rule wins).
+#
+# Sources:
+# - ABC Regulatory Guidelines: a boxer losing by TKO shall not participate for a minimum
+#   of 30 days; losing by KO, a minimum of 60 days (abcboxing.com, verified 2026-06).
+# - Association of Ringside Physicians consensus: KO with loss of consciousness warrants
+#   a longer (90-day) return-to-competition window.
+version: 1
+competition_windows_days:
+  TKO: 30
+  KO: 60
+  KO_LOC: 90
+rule_notes:
+  TKO: "ABC Regulatory Guidelines minimum: 30 days after TKO loss"
+  KO: "ABC Regulatory Guidelines minimum: 60 days after KO loss"
+  KO_LOC: "ARP consensus: 90 days after KO with loss of consciousness"
+
+# Sparring (no-contact) overlay. IMPORTANT FRAMING: this is a deliberate CornerCheck
+# safety layer informed by ARP return-to-train guidance. The ABC windows above govern
+# COMPETITION only; CornerCheck never attributes the sparring layer to the ABC.
+sparring_overlay:
+  enabled: true
+  attribution: "CornerCheck safety layer informed by ARP guidance; not an ABC mandate"
+  no_contact_days:
+    TKO: 30
+    KO: 45
+    KO_LOC: 60

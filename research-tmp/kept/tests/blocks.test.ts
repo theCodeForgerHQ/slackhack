@@ -1,0 +1,172 @@
+import { describe, it, expect } from "vitest";
+import {
+  confirmCard,
+  possibleFulfillmentCard,
+  closureDraftCard,
+  ledgerView,
+  auditHistoryView,
+  reminderMessage,
+  appHomeView,
+  auditModal,
+  addMappingModal,
+  editObligationModal,
+  editDraftModal,
+  actionId,
+  parseActionId,
+  ACTIONS,
+  CALLBACKS,
+  FIELDS,
+} from "../src/slack/blocks.js";
+import { assessFulfillment } from "../src/engine/reconciliation.js";
+import { buildClosureDraft } from "../src/policy/audience.js";
+import { EMPTY_RTS } from "../src/slack/rts.js";
+import { mkObl, evt } from "./helpers.js";
+import { prMerged, prodDeploy, ticketDone } from "../src/eval/scenarios.js";
+import type { Classification } from "../src/llm/schemas.js";
+
+const classification: Classification = { signal: "CUSTOMER_REQUEST", direction: "TEAM_OWES_CUSTOMER", confidence: 0.9, rationale: "ask" };
+
+describe("Block Kit builders", () => {
+  it("action id round-trips obligation id", () => {
+    expect(parseActionId(actionId(ACTIONS.confirm, "obl_1"))).toEqual({ action: ACTIONS.confirm, obligationId: "obl_1" });
+  });
+
+  it("confirm card carries the three Gate-1 buttons and stays private", () => {
+    const blocks = confirmCard(mkObl("CANDIDATE", { id: "obl_1" }), classification, EMPTY_RTS);
+    const actions = blocks.find((b) => (b as { type?: string }).type === "actions") as { elements: { action_id: string }[] };
+    const ids = actions.elements.map((e) => e.action_id);
+    expect(ids).toEqual([actionId(ACTIONS.confirm, "obl_1"), actionId(ACTIONS.edit, "obl_1"), actionId(ACTIONS.dismiss, "obl_1")]);
+    expect(JSON.stringify(blocks)).toContain("Private to you");
+  });
+
+  it("confirm card shows a roadmap-conflict warning when provided", () => {
+    const blocks = confirmCard(mkObl("CANDIDATE", { id: "o1" }), classification, EMPTY_RTS, "committed date is earlier than the roadmap target");
+    expect(JSON.stringify(blocks)).toContain("Roadmap conflict");
+  });
+
+  it("possible-fulfillment card lists reconciled evidence + verify button", () => {
+    const o = mkObl("POSSIBLE_FULFILLMENT", { id: "obl_2", evidence: [prMerged("p", "PR-449"), prodDeploy("d", "rel")] });
+    const blocks = possibleFulfillmentCard(o, assessFulfillment(o.evidence));
+    const json = JSON.stringify(blocks);
+    expect(json).toContain(actionId(ACTIONS.verify, "obl_2"));
+    expect(json).toContain("merged");
+  });
+
+  it("closure draft card shows the sanitized text and a leak-safe marker", () => {
+    const o = mkObl("VERIFIED", { id: "obl_3", outcome: "SSO login fix", evidence: [ticketDone("t", "PROJ-118"), prMerged("p", "PR-449"), prodDeploy("d", "rel")] });
+    const draft = buildClosureDraft(o);
+    const json = JSON.stringify(closureDraftCard(o, draft));
+    expect(json).toContain("SSO login fix");
+    expect(json).toContain(actionId(ACTIONS.approveSend, "obl_3"));
+    expect(json).not.toContain("PROJ-118"); // internal ref never in the draft
+  });
+
+  it("ledger view groups open vs closed", () => {
+    const blocks = ledgerView("Acme", [mkObl("IN_PROGRESS", { outcome: "SSO login fix" }), mkObl("CLOSED", { outcome: "Export feature" })]);
+    const json = JSON.stringify(blocks);
+    expect(json).toContain("What we owe Acme");
+    expect(json).toContain("SSO login fix");
+  });
+
+  it("audit history renders one line per event", () => {
+    const events = [
+      evt({ type: "REQUEST_DETECTED", team: "T_ACME", direction: "TEAM_OWES_CUSTOMER", signal: "CUSTOMER_REQUEST", customer: "Acme", subject_canonical: "X", outcome: "o", due: null, owner: null, conditions: [] }),
+      evt({ type: "COMMITMENT_CONFIRMED", outcome: "o", due: null, owner: "U_ENG" }, { approved_by: "U_AM" }),
+    ];
+    const json = JSON.stringify(auditHistoryView(mkObl("OPEN"), events));
+    expect(json).toContain("Promise captured"); // REQUEST_DETECTED → human-readable receipt
+    expect(json).toContain("Confirmed"); // COMMITMENT_CONFIRMED → human-readable receipt
+    expect(json).toContain("<@U_AM>"); // signed by the approver
+  });
+
+  it("reminder message is owner-facing", () => {
+    const { text } = reminderMessage(mkObl("IN_PROGRESS", { due: "2026-06-19", outcome: "SSO login fix" }), "OVERDUE");
+    expect(text).toContain("Overdue");
+    expect(text).toContain("SSO login fix");
+  });
+
+  it("App Home groups by customer and offers a History drill-in", () => {
+    const view = appHomeView([
+      mkObl("IN_PROGRESS", { id: "o1", customer: "Acme", outcome: "SSO login fix" }),
+      mkObl("OPEN", { id: "o2", customer: "Globex", outcome: "Export feature" }),
+    ]) as { type: string };
+    expect(view.type).toBe("home");
+    const json = JSON.stringify(view);
+    expect(json).toContain("Acme");
+    expect(json).toContain("Globex");
+    expect(json).toContain(actionId(ACTIONS.history, "o1"));
+  });
+
+  it("surfaces humanized status labels, never raw engine state names", () => {
+    // A user must never see POSSIBLE_FULFILLMENT / IN_PROGRESS etc. — only the friendly chip.
+    const json = JSON.stringify(
+      appHomeView([
+        mkObl("POSSIBLE_FULFILLMENT", { id: "o1", customer: "Acme", outcome: "SSO login fix" }),
+        mkObl("IN_PROGRESS", { id: "o2", customer: "Globex", outcome: "Export feature" }),
+      ]),
+    );
+    expect(json).toContain("Awaiting your verify"); // POSSIBLE_FULFILLMENT humanized
+    expect(json).toContain("In progress"); // IN_PROGRESS humanized
+    expect(json).not.toContain("POSSIBLE_FULFILLMENT");
+    expect(json).not.toContain("IN_PROGRESS");
+  });
+
+  it("App Home pulls awaiting-verify items into a 'Needs you' band", () => {
+    const json = JSON.stringify(
+      appHomeView([mkObl("POSSIBLE_FULFILLMENT", { id: "o1", customer: "Acme", outcome: "SSO login fix" })]),
+    );
+    expect(json).toContain("Needs you");
+  });
+
+  it("empty App Home shows an inviting empty state, not a dead end", () => {
+    const json = JSON.stringify(appHomeView([]));
+    expect(json).toContain("No promises tracked yet");
+  });
+
+  it("Connections lists each proof-target mapping with an edit + remove control", () => {
+    const json = JSON.stringify(
+      appHomeView([], Date.now(), ["launchdarkly"], undefined, {
+        Acme: { flag: { key: "sso-login-fix", environment: "production" } },
+        Globex: { flag: { key: "globex-billing" } },
+      }),
+    );
+    expect(json).toContain("Acme");
+    expect(json).toContain("sso-login-fix");
+    expect(json).toContain("Globex"); // multiple mappings coexist
+    expect(json).toContain(actionId(ACTIONS.removeMapping, "Acme")); // remove just this one
+    expect(json).toContain(actionId(ACTIONS.addMapping, "Acme")); // edit (pre-fills the modal)
+  });
+
+  it("edit-mapping modal pre-fills the flag + env for an existing key", () => {
+    const json = JSON.stringify(
+      addMappingModal({ Acme: { flag: { key: "sso-login-fix", environment: "staging" } } }, "Acme"),
+    );
+    expect(json).toContain("Edit proof-target"); // title reflects edit mode (≤24 chars — Slack modal-title limit)
+    expect(json).toContain("sso-login-fix"); // flag pre-filled
+    expect(json).toContain("staging"); // environment pre-filled
+  });
+
+  it("edit-obligation modal prefills fields and carries the obligation id", () => {
+    const view = editObligationModal(mkObl("CANDIDATE", { id: "o9", outcome: "SSO login fix", due: "2026-06-19", owner: "U_ENG" })) as { type: string; callback_id: string; private_metadata: string };
+    expect(view.type).toBe("modal");
+    expect(view.callback_id).toBe(CALLBACKS.editObligation);
+    expect(view.private_metadata).toBe("o9");
+    const json = JSON.stringify(view);
+    expect(json).toContain("SSO login fix");
+    expect(json).toContain("2026-06-19");
+    expect(json).toContain(FIELDS.outcome.action);
+  });
+
+  it("edit-draft modal prefills the customer reply text", () => {
+    const o = mkObl("VERIFIED", { id: "o3", outcome: "SSO login fix", evidence: [prMerged("p", "PR"), prodDeploy("d", "rel")] });
+    const view = editDraftModal(o, buildClosureDraft(o).text) as { callback_id: string };
+    expect(view.callback_id).toBe(CALLBACKS.editDraft);
+    expect(JSON.stringify(view)).toContain("available on your side");
+  });
+
+  it("audit modal wraps the history view", () => {
+    const view = auditModal(mkObl("OPEN"), [evt({ type: "REQUEST_DETECTED", team: "T_ACME", direction: "TEAM_OWES_CUSTOMER", signal: "CUSTOMER_REQUEST", customer: "Acme", subject_canonical: "X", outcome: "o", due: null, owner: null, conditions: [] })]) as { type: string };
+    expect(view.type).toBe("modal");
+    expect(JSON.stringify(view)).toContain("Promise captured"); // receipts timeline (REQUEST_DETECTED humanized)
+  });
+});

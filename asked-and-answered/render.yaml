@@ -1,0 +1,38 @@
+# Render Blueprint — asked-and-answered
+# Deploys the Slack agent as a free web service using the existing Dockerfile.
+# After first deploy, set the secret env vars in the Render dashboard.
+services:
+  - type: web
+    name: asked-and-answered
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheck:
+      path: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: LLM_PROVIDER
+        value: azure
+      # Required secrets — paste these in the Render dashboard after creation.
+      - key: SLACK_BOT_TOKEN
+        sync: false
+      - key: SLACK_SIGNING_SECRET
+        sync: false
+      - key: AA_LEDGER_KEY
+        generateValue: true
+      - key: AZURE_OPENAI_ENDPOINT
+        sync: false
+      - key: AZURE_OPENAI_API_KEY
+        sync: false
+      - key: AZURE_OPENAI_DEPLOYMENT
+        sync: false
+      # Optional overrides
+      # - key: AZURE_OPENAI_MODEL
+      #   value: gpt-4o-mini
+      # - key: AZURE_OPENAI_API_VERSION
+      #   value: 2024-02-01
+      # - key: AA_DB_PATH
+      #   value: asked-and-answered.db

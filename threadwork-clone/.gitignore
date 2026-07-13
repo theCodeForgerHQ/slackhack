@@ -1,0 +1,14 @@
+node_modules/
+.env
+data/
+
+# local planning docs - not part of the shipped code
+CLAUDE.md
+AGENTS.md
+THREADWORK_SPEC.md
+blueprint.md
+prompts.md
+hackathon.md
+docs/
+.lavish/
+.claude/

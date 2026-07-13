@@ -1,0 +1,53 @@
+{
+  "display_information": {
+    "name": "Threadwork",
+    "description": "Turn any messy thread into a structured work post - decisions, tasks, related history, and a supervised agent action.",
+    "long_description": "Threadwork is a Slack agent you @mention in any thread. It reads the conversation and converts it into durable work objects: a structured Canvas work post (decisions, open questions, summary), a Slack List of extracted tasks with owners, links to related past discussions found via the Real-Time Search API, and a supervised agent run - a card where the agent proposes to complete one task itself and executes only after a human clicks Approve. Conversation in. Accountable work out.",
+    "background_color": "#2b2d42"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "Threadwork",
+      "always_online": true
+    },
+    "app_home": {
+      "home_tab_enabled": true,
+      "messages_tab_enabled": true,
+      "messages_tab_read_only_enabled": true
+    }
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "channels:history",
+        "groups:history",
+        "im:history",
+        "mpim:history",
+        "chat:write",
+        "reactions:write",
+        "users:read",
+        "canvases:write",
+        "canvases:read",
+        "lists:write",
+        "lists:read",
+        "search:read.public"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "bot_events": [
+        "app_mention",
+        "app_home_opened",
+        "message.channels"
+      ]
+    },
+    "interactivity": {
+      "is_enabled": true
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": true,
+    "token_rotation_enabled": false
+  }
+}

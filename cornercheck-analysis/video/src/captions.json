@@ -1,0 +1,227 @@
+{
+  "beat0": [
+    {
+      "text": "In 2017, fighter Tim Hague died after a knockout in a boxing match.",
+      "from": 0.0,
+      "to": 5.27
+    },
+    {
+      "text": "His medical suspension had lapsed days earlier, and he fought as a late replacement.",
+      "from": 5.27,
+      "to": 10.87
+    },
+    {
+      "text": "Nobody re-checked.",
+      "from": 10.87,
+      "to": 12.19
+    },
+    {
+      "text": "The records existed.",
+      "from": 12.19,
+      "to": 14.13
+    },
+    {
+      "text": "Nothing forced the check.",
+      "from": 14.13,
+      "to": 15.62
+    },
+    {
+      "text": "So I built it, inside Slack, where fight operations already work.",
+      "from": 15.62,
+      "to": 19.7
+    }
+  ],
+  "beat10": [
+    {
+      "text": "CornerCheck is one cross-check, where fight teams already work, between a fighter and the worst day of someone's life.",
+      "from": 0.0,
+      "to": 7.12
+    },
+    {
+      "text": "Thank you for watching.",
+      "from": 7.12,
+      "to": 9.3
+    }
+  ],
+  "beat2": [
+    {
+      "text": "Clear a whole lineup at once.",
+      "from": 0.48,
+      "to": 3.93
+    },
+    {
+      "text": "Green: no recorded suspension matched.",
+      "from": 3.93,
+      "to": 6.46
+    },
+    {
+      "text": "Red: blocked, with the reason cited underneath.",
+      "from": 6.46,
+      "to": 9.08
+    },
+    {
+      "text": "And the yellow one says NEEDS PICK, because it refuses to guess who that fighter even is.",
+      "from": 9.08,
+      "to": 14.11
+    },
+    {
+      "text": "Every verdict on this board just landed in a tamper-evident audit ledger.",
+      "from": 14.11,
+      "to": 17.74
+    }
+  ],
+  "beat3": [
+    {
+      "text": "The catch that matters.",
+      "from": 0.72,
+      "to": 2.42
+    },
+    {
+      "text": "Blocked: an active indefinite suspension from the California commission, pending neurological clearance after a knockout.",
+      "from": 2.42,
+      "to": 8.45
+    },
+    {
+      "text": "Source cited right there.",
+      "from": 8.45,
+      "to": 10.41
+    },
+    {
+      "text": "Texas is a different commission, and that gap is what CornerCheck closes.",
+      "from": 10.41,
+      "to": 14.24
+    },
+    {
+      "text": "At the bottom, a warning surfaced from the team's own Slack messages.",
+      "from": 14.24,
+      "to": 17.59
+    },
+    {
+      "text": "And the footnote: identity confirmed by a calibrated statistical gate.",
+      "from": 17.59,
+      "to": 21.5
+    }
+  ],
+  "beat4": [
+    {
+      "text": "Two professional fighters are named Bruno Silva.",
+      "from": 0.49,
+      "to": 3.41
+    },
+    {
+      "text": "Clearing the wrong one can be fatal, so it will not guess.",
+      "from": 3.41,
+      "to": 6.45
+    },
+    {
+      "text": "It shows both, with weight class and record, and a human picks.",
+      "from": 6.45,
+      "to": 10.46
+    },
+    {
+      "text": "The pick itself is written to the ledger.",
+      "from": 10.46,
+      "to": 12.74
+    }
+  ],
+  "beat5": [
+    {
+      "text": "Boxing verdicts get corroborated against a live record feed.",
+      "from": 0.69,
+      "to": 4.82
+    },
+    {
+      "text": "That line is his actual professional record from the live source.",
+      "from": 4.82,
+      "to": 8.08
+    },
+    {
+      "text": "The rule is one-way: live data can tighten a verdict.",
+      "from": 8.08,
+      "to": 11.82
+    },
+    {
+      "text": "Nothing it says can ever loosen one.",
+      "from": 11.82,
+      "to": 13.9
+    }
+  ],
+  "beat6": [
+    {
+      "text": "Every card carries this button.",
+      "from": 0.54,
+      "to": 2.68
+    },
+    {
+      "text": "Click it, and the Z3 theorem prover re-proves, right then, that an active suspension can never come out cleared, across every possible date.",
+      "from": 2.68,
+      "to": 11.25
+    },
+    {
+      "text": "The second line is a deliberately broken version that must fail.",
+      "from": 11.25,
+      "to": 15.29
+    },
+    {
+      "text": "No rubber stamps.",
+      "from": 15.29,
+      "to": 16.68
+    }
+  ],
+  "beat7": [
+    {
+      "text": "Every decision, hash-chained and append-only.",
+      "from": 0.0,
+      "to": 3.32
+    },
+    {
+      "text": "Edit one past entry and verification names it.",
+      "from": 3.32,
+      "to": 6.89
+    },
+    {
+      "text": "One click exports the whole trail to a Canvas you can hand to a promoter or a commission.",
+      "from": 6.89,
+      "to": 14.3
+    }
+  ],
+  "beat8": [
+    {
+      "text": "And it does not wait to be asked.",
+      "from": 0.52,
+      "to": 2.78
+    },
+    {
+      "text": "A daily digest: windows about to lapse, windows just lapsed, new blocks.",
+      "from": 2.78,
+      "to": 8.05
+    },
+    {
+      "text": "Deterministic triggers only.",
+      "from": 8.05,
+      "to": 10.25
+    },
+    {
+      "text": "Quiet days send nothing.",
+      "from": 10.25,
+      "to": 12.37
+    }
+  ],
+  "beat9": [
+    {
+      "text": "All of it is live right now.",
+      "from": 0.73,
+      "to": 3.03
+    },
+    {
+      "text": "Real numbers from the real database, and that proof button works for you too.",
+      "from": 3.03,
+      "to": 7.12
+    },
+    {
+      "text": "Milliseconds.",
+      "from": 7.12,
+      "to": 8.9
+    }
+  ]
+}

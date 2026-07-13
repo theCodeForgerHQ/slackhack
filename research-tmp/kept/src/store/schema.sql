@@ -1,0 +1,111 @@
+-- Kept event store (production substrate).
+-- Append-only. The obligation projection is derived in application code (projection.ts).
+-- Zero-copy (correction #3): payload holds derived, human-confirmed structured fields
+-- and refs/permalinks only — never raw Slack message bodies. Enforced in code before insert.
+
+CREATE TABLE IF NOT EXISTS obligation_events (
+  seq             BIGSERIAL PRIMARY KEY,
+  obligation_id   TEXT NOT NULL,
+  -- W1 (invariant #4): tenant partition key — the owning Slack workspace. Every read
+  -- is scoped by team_id; a cross-tenant read is a P0 bug. Carried on every row so the
+  -- partition holds for future per-tenant queries/exports/deletes, not just the head.
+  team_id         TEXT NOT NULL,
+  event_type      TEXT NOT NULL,
+  -- Idempotency (C6): the safety net that makes duplicate Slack events / webhooks
+  -- a no-op at the storage layer.
+  idempotency_key TEXT NOT NULL UNIQUE,
+  payload         JSONB NOT NULL,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_obligation_events_obligation
+  ON obligation_events (obligation_id, seq);
+
+-- W1 — the tenant choke point: getAllObligationIds(teamId) filters on team_id.
+CREATE INDEX IF NOT EXISTS idx_obligation_events_team
+  ON obligation_events (team_id, obligation_id);
+
+-- Approved roadmap (system of record for the contradiction check). A committed due
+-- date earlier than target_date raises a private warning at Gate 1.
+-- W1 — roadmap is tenant-partitioned by team_id, and the read path
+-- (PostgresRoadmapSource.list(teamId)) is now team-scoped (invariant #4).
+CREATE TABLE IF NOT EXISTS roadmap (
+  team_id           TEXT NOT NULL,
+  customer          TEXT NOT NULL,
+  subject_canonical TEXT NOT NULL,
+  target_date       DATE NOT NULL,
+  PRIMARY KEY (team_id, customer, subject_canonical)
+);
+
+-- W2 (invariant #6): multi-workspace OAuth installs. One row per installed workspace
+-- (id = team.id) or org (id = enterprise.id), holding the normalized installation JSON
+-- returned by Slack — including the per-tenant bot token used to authorize each event.
+-- This is NOT an obligation event log; it legitimately stores OAuth secrets and is not
+-- subject to the zero-copy guard.
+CREATE TABLE IF NOT EXISTS slack_installations (
+  id            TEXT PRIMARY KEY,
+  team_id       TEXT,
+  enterprise_id TEXT,
+  installation  JSONB NOT NULL,
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_slack_installations_team ON slack_installations (team_id);
+
+-- Per-tenant integration config: each installed workspace connects ITS OWN proof sources
+-- (LaunchDarkly / Jira / GitHub) + proof-target mapping via the App Home "Connections" UI.
+-- One row per (team_id, provider). `config_enc` is the AES-256-GCM ciphertext (base64) of the
+-- provider config JSON (which holds API tokens). Like `slack_installations`, this legitimately
+-- stores secrets and is NOT an obligation event log, so it is not subject to the zero-copy guard.
+-- Isolation (invariant #4, P0): every read is keyed by team_id — a config row is only ever
+-- resolved for the acting workspace; there is no unscoped read path.
+CREATE TABLE IF NOT EXISTS tenant_config (
+  team_id     TEXT NOT NULL,
+  provider    TEXT NOT NULL,
+  config_enc  TEXT NOT NULL,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (team_id, provider)
+);
+
+-- Per-tenant usage metering — the "pilot" free-tier guardrail. Kept's dominant variable cost is
+-- the LLM classification run on every ingested message; this caps those calls per workspace per
+-- month (period = YYYY-MM). Read/incremented only for the acting team (invariant #4). Holds no
+-- message content, so it is not subject to the zero-copy guard.
+CREATE TABLE IF NOT EXISTS usage_counters (
+  team_id     TEXT NOT NULL,
+  period      TEXT NOT NULL,
+  count       INTEGER NOT NULL DEFAULT 0,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (team_id, period)
+);
+
+-- W6 — customer trust page capability tokens. An opaque, unguessable, revocable
+-- per-(team, customer) capability: the token IS the authorization (no login), and
+-- `GET /trust/:token` resolves it to exactly one (team_id, customer). Tenant isolation
+-- (invariant #4) holds by construction — the resolved team_id is the only team the
+-- page may read. Not an obligation event log: stores no message content, so it is not
+-- subject to the zero-copy guard. A revoked link resolves to nothing (404, no leak).
+CREATE TABLE IF NOT EXISTS trust_links (
+  token       TEXT PRIMARY KEY,
+  team_id     TEXT NOT NULL,
+  customer    TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  revoked_at  TIMESTAMPTZ
+);
+-- Fast lookup of the active link for a (team, customer); mint is idempotent per pair.
+CREATE INDEX IF NOT EXISTS idx_trust_links_active
+  ON trust_links (team_id, upper(customer)) WHERE revoked_at IS NULL;
+
+-- W2: reminder queue for the PostgresScheduler (so the hosted path needs no Redis).
+-- Pending AT_RISK / OVERDUE jobs; the poll loop claims due rows atomically
+-- (UPDATE ... RETURNING) so multiple instances never double-fire. Deterministic id
+-- (`${obligation_id}:${kind}`) makes re-scheduling replace rather than duplicate.
+CREATE TABLE IF NOT EXISTS reminders (
+  id            TEXT PRIMARY KEY,
+  obligation_id TEXT NOT NULL,
+  kind          TEXT NOT NULL,
+  fire_at       TIMESTAMPTZ NOT NULL,
+  fired_at      TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_reminders_due ON reminders (fire_at) WHERE fired_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_reminders_obligation ON reminders (obligation_id);

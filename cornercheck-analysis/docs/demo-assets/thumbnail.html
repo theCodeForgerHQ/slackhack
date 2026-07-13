@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<style>
+  html, body { width: 1200px; height: 800px; margin: 0; overflow: hidden; }
+  body {
+    background: radial-gradient(1200px 800px at 75% -10%, #14203a 0%, #0b1220 55%);
+    color: #e6edf3;
+    font: 400 24px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; align-items: center;
+  }
+  .wrap { width: 1040px; margin: 0 auto; }
+  .kicker {
+    color: #7ee2b8; font-size: 26px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.22em; margin-bottom: 26px;
+  }
+  h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 18px; }
+  .sub { font-size: 40px; color: #c9d6e4; margin: 0 0 34px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 56px; }
+  .chip {
+    background: #0e1830; border: 1px solid #24314f; border-radius: 12px;
+    padding: 12px 20px; font-size: 25px; color: #9fb3c8;
+  }
+  .chip.accent { border-color: #2f6f46; color: #7ee2b8; font-weight: 700; }
+  .foot { display: flex; align-items: center; justify-content: space-between; }
+  .live {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #11261b; border: 1px solid #2f6f46; border-radius: 999px;
+    padding: 10px 22px; font-size: 24px; font-weight: 700; color: #7ee2b8;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #3fb950; }
+  .meta { text-align: right; font-size: 23px; color: #9fb3c8; line-height: 1.5; }
+  .meta b { color: #e6edf3; }
+</style></head>
+<body>
+  <div class="wrap">
+    <div class="kicker">Fighter safety, where teams already work</div>
+    <h1>CornerCheck</h1>
+    <p class="sub">The agent that refuses to guess.</p>
+    <div class="chips">
+      <span class="chip accent">Fail-closed &#10003;</span>
+      <span class="chip accent">Z3-proven rules &#10003;</span>
+      <span class="chip accent">Conformal-certified identity &#10003;</span>
+      <span class="chip">Hash-chained audit trail</span>
+    </div>
+    <div class="foot">
+      <span class="live"><span class="dot"></span> LIVE</span>
+      <div class="meta">Slack Agent Builder Challenge<br><b>Agent for Good</b></div>
+    </div>
+  </div>
+</body></html>

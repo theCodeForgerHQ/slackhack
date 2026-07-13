@@ -1,0 +1,41 @@
+{
+  "question": "What did we decide about pricing, and did anything change since?",
+  "answer": "The team set the pricing tier at $10 [3], then changed it to $20 [1] after a market review. The current value is $20.",
+  "citations": [
+    {
+      "index": 3,
+      "permalink": "https://slack.com/archives/pricing/p1777374000000000?thread_ts=1777374000.000000&cid=4be1f1b4",
+      "channel": "pricing",
+      "quote": "We set the pricing tier to $10 per user for launch."
+    },
+    {
+      "index": 1,
+      "permalink": "https://slack.com/archives/decisions/p1782120600000000?thread_ts=1782120600.000000&cid=9affd7b0",
+      "channel": "decisions",
+      "quote": "After market review we changed the pricing tier to $20 per user."
+    }
+  ],
+  "follow_up_hops": 0,
+  "evidence_count": 3,
+  "graph": {
+    "entities": 12,
+    "topics": 10,
+    "values": 2,
+    "people": 0,
+    "decisions": 2,
+    "reversals": 1
+  },
+  "timeline": [
+    {
+      "value": "$10",
+      "channel": "pricing",
+      "ts": "1777374000.000000"
+    },
+    {
+      "value": "$20",
+      "channel": "decisions",
+      "ts": "1782120600.000000"
+    }
+  ],
+  "current_value": "$20"
+}

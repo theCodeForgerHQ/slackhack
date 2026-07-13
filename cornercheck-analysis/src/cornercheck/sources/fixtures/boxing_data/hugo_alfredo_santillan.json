@@ -1,0 +1,175 @@
+{
+ "query": "Hugo Alfredo Santillan",
+ "fetched_at": "2026-06-09T18:55:22.199959+00:00",
+ "source": "boxing-data-api.p.rapidapi.com /v2/fighters/?name=",
+ "note": "REAL recorded API response (not mock), captured 2026-06-09 for demo fallback",
+ "data": [
+  {
+   "id": "6715fc1faf69bb50508b7c07",
+   "name": "Hugo Ruiz",
+   "alias": "Cuatito",
+   "gender": "m",
+   "age": 38,
+   "height": "5' 9\" / 176 cm",
+   "height_ft": "5'9\"",
+   "height_cm": 177.0,
+   "height_in": 68.9,
+   "nationality": "Mexico",
+   "nationality_code": "MX",
+   "nickname": "Cuatito",
+   "reach": "69.3\" / 176 cm",
+   "reach_cm": 179.0,
+   "reach_in": 70.0,
+   "stance": "orthodox",
+   "stats": {
+    "wins": 39,
+    "losses": 5,
+    "draws": 0,
+    "total_rounds": 175
+   },
+   "debut": "2006",
+   "division": {
+    "id": "671513530ad13034eb882651",
+    "name": "Super Featherweight",
+    "weight_lb": 130.0,
+    "weight_kg": 58.97
+   },
+   "titles": [],
+   "updated_at": "2026-03-01T16:27:38.030000"
+  },
+  {
+   "id": "6715fc1eaf69bb50508b797e",
+   "name": "Alfredo Angulo",
+   "alias": "Perro",
+   "gender": "m",
+   "age": 42,
+   "height": "5' 9\" / 175 cm",
+   "height_ft": "5'9\"",
+   "height_cm": 177.0,
+   "height_in": 68.9,
+   "nationality": "Mexico",
+   "nationality_code": "MX",
+   "nickname": "Perro",
+   "reach": "69.7\" / 177 cm",
+   "reach_cm": 177.0,
+   "reach_in": 69.0,
+   "stance": "orthodox",
+   "stats": {
+    "wins": 26,
+    "losses": 8,
+    "draws": 0,
+    "total_rounds": 169
+   },
+   "debut": "2005",
+   "division": {
+    "id": "671513530ad13034eb882657",
+    "name": "Super Middleweight",
+    "weight_lb": 168.0,
+    "weight_kg": 76.2
+   },
+   "titles": [],
+   "updated_at": null
+  },
+  {
+   "id": "6715fc1faf69bb50508b7c16",
+   "name": "Giovani Santillan",
+   "alias": "Gallo de Oro",
+   "gender": "m",
+   "age": 32,
+   "height": "5' 8\" / 173 cm",
+   "height_ft": "5'8\"",
+   "height_cm": 173.0,
+   "height_in": 68.11,
+   "nationality": "United States",
+   "nationality_code": "US",
+   "nickname": "Gallo de Oro",
+   "reach": "68.5\" / 174 cm",
+   "reach_cm": 174.0,
+   "reach_in": 68.0,
+   "stance": "southpaw",
+   "stats": {
+    "wins": 34,
+    "losses": 1,
+    "draws": 0,
+    "total_rounds": 187
+   },
+   "debut": "2012",
+   "division": {
+    "id": "671513530ad13034eb882654",
+    "name": "Welterweight",
+    "weight_lb": 147.0,
+    "weight_kg": 66.68
+   },
+   "titles": [],
+   "updated_at": null
+  },
+  {
+   "id": "68287eb1162efadfc8bc2de7",
+   "name": "Victor Santillan",
+   "alias": null,
+   "gender": "m",
+   "age": null,
+   "height": null,
+   "height_ft": "5'5\"",
+   "height_cm": 166.0,
+   "height_in": null,
+   "nationality": "Dominican Republic",
+   "nationality_code": "DO",
+   "nickname": null,
+   "reach": null,
+   "reach_cm": null,
+   "reach_in": 65.0,
+   "stance": "southpaw",
+   "stats": {
+    "wins": 15,
+    "losses": 2,
+    "draws": 0
+   },
+   "debut": "2018",
+   "division": {
+    "id": "671513530ad13034eb88264e",
+    "name": "Bantamweight",
+    "weight_lb": 118.0,
+    "weight_kg": 53.52
+   },
+   "titles": [],
+   "updated_at": "2026-02-23T01:51:03.630000"
+  },
+  {
+   "id": "68288542162efadfc8bc3b33",
+   "name": "Omar Salcido Gamez",
+   "alias": "Super",
+   "gender": "m",
+   "age": null,
+   "height": null,
+   "height_ft": "5'7\"",
+   "height_cm": 170.0,
+   "height_in": null,
+   "nationality": "Mexico",
+   "nationality_code": "MX",
+   "nickname": null,
+   "reach": null,
+   "reach_cm": null,
+   "reach_in": null,
+   "stance": "orthodox",
+   "stats": {
+    "wins": 19,
+    "losses": 2,
+    "draws": 0,
+    "total_bouts": 21,
+    "ko_percentage": 68,
+    "ko_wins": 13,
+    "stopped": 0
+   },
+   "debut": "2018",
+   "division": {
+    "id": "671513530ad13034eb882652",
+    "name": "Lightweight",
+    "weight_lb": 135.0,
+    "weight_kg": 61.23
+   },
+   "titles": [],
+   "updated_at": null
+  }
+ ]
+}

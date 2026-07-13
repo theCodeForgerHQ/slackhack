@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# coverage artifacts
+.coverage
+coverage.xml
+htmlcov/
+
+# aider working artifacts
+.aider*
+.aider.tags.cache.v*/

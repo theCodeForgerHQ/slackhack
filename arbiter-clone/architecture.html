@@ -1,0 +1,84 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+  :root{ --bg:#ffffff; --ink:#1a2233; --mut:#5c6780; --line:#c3cbe0;
+    --entry:#eef3fb; --entry-b:#7ea3d8; --core:#eaf7f0; --core-b:#4fa97f;
+    --mode:#fff5ee; --mode-b:#e0864f; --data:#f3f0fa; --data-b:#9a7fd0;
+    --ext:#fdf0f2; --ext-b:#d06b82; --gold:#c99a2e;
+    --sans:"Segoe UI",system-ui,sans-serif; --mono:Consolas,monospace; }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:var(--sans);color:var(--ink)}
+  .page{width:1400px;padding:34px 40px 40px}
+  h1{font-size:26px;margin:0} .tag{color:var(--mut);font-size:14px;margin:3px 0 2px}
+  .thesis{color:var(--mut);font-size:12.5px;font-family:var(--mono);margin:0 0 20px}
+  .layer{margin:0 0 8px;font:600 11px var(--mono);letter-spacing:1.5px;color:var(--mut);text-transform:uppercase}
+  .band{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .box{border:1.5px solid;border-radius:8px;padding:10px 13px;background:#fff;min-width:150px}
+  .box .t{font-weight:650;font-size:13px} .box .s{color:var(--mut);font-size:10.5px;margin-top:2px;line-height:1.4}
+  .box .tech{font-family:var(--mono);font-size:9px;color:var(--mut);margin-top:4px}
+  .entry{background:var(--entry);border-color:var(--entry-b)}
+  .core{background:var(--core);border-color:var(--core-b)}
+  .mode{background:var(--mode);border-color:var(--mode-b)}
+  .data{background:var(--data);border-color:var(--data-b)}
+  .ext{background:var(--ext);border-color:var(--ext-b)}
+  .gold{box-shadow:inset 0 0 0 2px var(--gold)}
+  .flow{display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:22px;margin:2px 0}
+  .modes{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  .datarow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .legend{display:flex;gap:16px;margin-top:18px;font-size:11px;color:var(--mut);flex-wrap:wrap}
+  .chip{display:inline-block;width:11px;height:11px;border-radius:3px;border:1.5px solid;vertical-align:-1px;margin-right:5px}
+</style></head><body><div class="page">
+
+  <h1>Arbiter &mdash; Architecture</h1>
+  <div class="tag">the workspace's judgment layer &middot; one multi-agent brain &middot; six verdicts</div>
+  <div class="thesis">Slack Agent Builder Challenge 2026 &middot; Python / Slack Bolt (Socket Mode) &middot; LangGraph &middot; Neo4j</div>
+
+  <div class="layer">1 &middot; Entry &mdash; how work reaches Arbiter</div>
+  <div class="band">
+    <div class="box entry"><div class="t">@Arbiter &middot; /arbiter</div><div class="s">mention &amp; slash command</div></div>
+    <div class="box entry"><div class="t">Assistant pane</div><div class="s">suggested prompts &middot; chat</div></div>
+    <div class="box entry"><div class="t">React &middot; right-click</div><div class="s">"Judge this message"</div></div>
+    <div class="box entry"><div class="t">Watched channels</div><div class="s">proactive &middot; every message &middot; away-detect</div></div>
+    <div class="box entry"><div class="t">File upload</div><div class="s">image &middot; PDF &middot; voice</div></div>
+  </div>
+  <div class="flow">&#9660;</div>
+
+  <div class="layer">2 &middot; Coordinator &mdash; routes each message to one judgment</div>
+  <div class="band">
+    <div class="box core"><div class="t">Dedup + heuristic gate</div><div class="s">restart-safe &middot; free pre-filter drops ~90% of traffic</div><div class="tech">judgment.py</div></div>
+    <div class="box core"><div class="t">Fast classifier</div><div class="s">one small-model call &middot; temperature 0 (deterministic)</div><div class="tech">Cerebras</div></div>
+    <div class="box core gold"><div class="t">Arbitration</div><div class="s">decision &gt; substance &gt; claim &middot; ONE intervention max</div></div>
+    <div class="box core"><div class="t">Prediction short-circuit</div><div class="s">future-dated &rarr; ledger, scored when due</div></div>
+  </div>
+  <div class="flow">&#9660;</div>
+
+  <div class="layer">3 &middot; Judgment modes &mdash; six verdicts, one brain</div>
+  <div class="modes">
+    <div class="box mode"><div class="t">Claim</div><div class="s">fact-check: 4 evidence sources &rarr; council of 3 model families (early-stop; split &rarr; dispute-search + round 2) &rarr; verdict card</div><div class="tech">llm.py &middot; council.py</div></div>
+    <div class="box mode"><div class="t">Substance</div><div class="s">anti-workslop: count units &rarr; arithmetic score (no LLM "rating") &rarr; private receipt</div><div class="tech">substance.py</div></div>
+    <div class="box mode"><div class="t">Decision</div><div class="s">missing voices (quote-first) + the record + grounded counter-case</div><div class="tech">decisions.py</div></div>
+    <div class="box mode"><div class="t">Delegate</div><div class="s">answer for the absent/departed from their record &middot; fidelity-gated &middot; away-auto &middot; opt-in "best guess" pill</div><div class="tech">delegate.py</div></div>
+    <div class="box mode"><div class="t">Roundtable</div><div class="s">"act as @A @B": teammates voiced from their own messages debate a topic &rarr; grounded conclusion</div><div class="tech">roundtable.py</div></div>
+    <div class="box mode"><div class="t">Catch-up</div><div class="s">what you missed on return + up/down that tunes behavior</div><div class="tech">catchup.py</div></div>
+  </div>
+  <div class="flow">&#9660;</div>
+
+  <div class="layer">4 &middot; Shared substrate &mdash; retrieve &middot; act &middot; remember &middot; learn</div>
+  <div class="datarow">
+    <div class="box ext gold"><div class="t">Real-Time Search API</div><div class="s">grounds claims &middot; finds missing voices &amp; delegate records &middot; novelty check</div><div class="tech">assistant.search.context &middot; REQUIRED tech</div></div>
+    <div class="box ext gold"><div class="t">MCP server</div><div class="s">acts in Slack: reactions &middot; audit-trail Canvas export</div><div class="tech">mcp.slack.com &middot; REQUIRED tech</div></div>
+    <div class="box data"><div class="t">Neo4j claim graph</div><div class="s">claims &middot; CONTRADICTS/SUPPORTS &middot; authors &middot; predictions &middot; interventions &middot; learned thresholds</div><div class="tech">AuraDB</div></div>
+  </div>
+  <div class="datarow" style="margin-top:12px">
+    <div class="box data"><div class="t">Self-audit + learning</div><div class="s">every intervention logged &middot; down-vote makes a mode more reserved, up-vote relaxes it (bounded, graph-persisted)</div><div class="tech">audit.py &middot; learning.py</div></div>
+    <div class="box data"><div class="t">Native Lists &middot; Home tab</div><div class="s">Prediction Ledger &middot; Decision Register &middot; dashboard</div><div class="tech">slackLists.*</div></div>
+    <div class="box data"><div class="t">Model registry (7)</div><div class="s">NVIDIA &middot; Cerebras &middot; Groq &middot; OpenRouter &middot; Gemini &middot; OpenAI &middot; Anthropic</div><div class="tech">60s circuit-breakers</div></div>
+  </div>
+
+  <div class="legend">
+    <span><span class="chip entry"></span>entry</span>
+    <span><span class="chip core"></span>coordinator</span>
+    <span><span class="chip mode"></span>judgment mode</span>
+    <span><span class="chip ext"></span>Slack platform (RTS + MCP)</span>
+    <span><span class="chip data"></span>state / models</span>
+    <span><span class="chip" style="border-color:var(--gold);box-shadow:inset 0 0 0 2px var(--gold)"></span>gold = required challenge tech</span>
+  </div>
+  <div style="margin-top:10px;font-size:11.5px;color:var(--ink)"><b>Benchmarks:</b> fact-check 100% vs 90% baseline (+10pp) &middot; workslop 20/20 dev, 9/10 held-out &middot; routing 96% on a held-out 8-mode set (macro-F1 0.98) &middot; 66 unit tests</div>
+</div></body></html>

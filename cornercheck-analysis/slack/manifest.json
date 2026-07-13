@@ -1,0 +1,120 @@
+{
+  "display_information": {
+    "name": "CornerCheck",
+    "description": "Fail-closed fighter-clearance agent: suspensions, return windows, audit trail.",
+    "background_color": "#101828",
+    "long_description": "CornerCheck helps fight-operations teams, matchmakers, and athletic commissions confirm whether a fighter is safe and cleared to compete. It checks curated, source-cited cross-jurisdiction medical suspension records, enforces Association of Ringside Physicians return-to-competition windows, surfaces injury mentions from your own Slack with permalink citations, and refuses to clear when fighter identity is ambiguous. Decision support only: a human always makes the final call, and every decision lands in a tamper-evident audit ledger."
+  },
+  "features": {
+    "app_home": {
+      "messages_tab_enabled": true,
+      "messages_tab_read_only_enabled": false
+    },
+    "bot_user": {
+      "display_name": "CornerCheck",
+      "always_online": true
+    },
+    "assistant_view": {
+      "assistant_description": "Ask whether a fighter is cleared to compete. I check suspensions, return windows, and your team's own injury chatter, and I refuse to clear ambiguous identities.",
+      "suggested_prompts": [
+        {
+          "title": "Check a fighter",
+          "message": "Is Junior dos Santos cleared in Texas?"
+        },
+        {
+          "title": "Check a whole card",
+          "message": "Check this card in Texas: Junior dos Santos vs Curtis Blaydes, Bruno Silva vs Brad Tavares"
+        },
+        {
+          "title": "Ambiguous name",
+          "message": "Is Bruno Silva cleared to fight?"
+        },
+        {
+          "title": "Famous case",
+          "message": "Is Jon Jones cleared to fight in California?"
+        }
+      ]
+    }
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "assistant:write",
+        "app_mentions:read",
+        "chat:write",
+        "im:history",
+        "im:read",
+        "im:write",
+        "channels:history",
+        "channels:read",
+        "search:read.public",
+        "users:read",
+        "canvases:write",
+        "files:read",
+        "pins:write"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "bot_events": [
+        "app_mention",
+        "assistant_thread_started",
+        "assistant_thread_context_changed",
+        "message.im"
+      ]
+    },
+    "interactivity": {
+      "is_enabled": true
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": true,
+    "token_rotation_enabled": false,
+    "function_runtime": "remote"
+  },
+  "functions": {
+    "check_fighter_clearance": {
+      "title": "Check fighter clearance",
+      "description": "Fail-closed clearance check: CLEAR, DO_NOT_CLEAR, NEEDS_PICK, or NOT_FOUND, with the blocking record cited. Never auto-clears.",
+      "input_parameters": {
+        "fighter_name": {
+          "type": "string",
+          "title": "Fighter name",
+          "description": "Full name of the fighter to check",
+          "is_required": true,
+          "name": "fighter_name"
+        },
+        "jurisdiction": {
+          "type": "string",
+          "title": "Jurisdiction (optional)",
+          "description": "Where the bout would happen, e.g. Texas",
+          "is_required": false,
+          "name": "jurisdiction"
+        }
+      },
+      "output_parameters": {
+        "status": {
+          "type": "string",
+          "title": "Clearance status",
+          "description": "CLEAR, DO_NOT_CLEAR, NEEDS_PICK, or NOT_FOUND",
+          "is_required": true,
+          "name": "status"
+        },
+        "detail": {
+          "type": "string",
+          "title": "Detail",
+          "description": "The cited blocker or the decision-support note",
+          "is_required": true,
+          "name": "detail"
+        },
+        "fighter": {
+          "type": "string",
+          "title": "Fighter",
+          "description": "The resolved fighter name",
+          "is_required": false,
+          "name": "fighter"
+        }
+      }
+    }
+  }
+}

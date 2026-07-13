@@ -1,0 +1,29 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'fly.toml'
+      - 'src/**'
+      - 'Dockerfile'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # `secrets` can't be used in a job-level `if:`, so we lift the token into env
+    # and guard the deploy step on it — the job is a no-op on forks / until
+    # FLY_API_TOKEN is set (repo Settings → Secrets and variables → Actions).
+    # Mint a token with `fly tokens create deploy` (see docs/DEPLOY.md).
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy to Fly.io
+        if: ${{ env.FLY_API_TOKEN != '' }}
+        run: flyctl deploy --remote-only

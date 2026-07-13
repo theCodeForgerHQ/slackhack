@@ -1,0 +1,352 @@
+# flood-1 — "48 hours, compressed to 3 minutes" (BUILD-DOC §4.3, §12.2).
+#
+# A fictional flood in the Bay Relief Collective's coastal city. Fired by the
+# injector as the labelled "Relay Simulator 🧪" identity (CLAUDE.md rule 10).
+# ALL data is fictional: personas are invented Tamil names, every phone number
+# is an obviously-fake 98400 0xxxx string, localities are real place names on a
+# fictional grid (seed/localities.json).
+#
+# Composition of the 14 intake messages:
+#   · 3 Tamil-English code-mix (m01, m04, m08)        language: ta-en
+#   · 2 exact-contact duplicates (m06=m02, m10=m03)   same phone, new persona
+#   · 1 fuzzy duplicate (m12 of m01)                  reworded, NO contact
+#   · 1 garbled low-confidence (m13)                  -> NEEDS_REVIEW
+#   · 7 clear English spanning medical / rescue / food / water / shelter /
+#     transport, incl. m02 dialysis + m03 trapped family (critical floors).
+# 11 distinct incidents remain once the 3 duplicates resolve.
+#
+# Total intake delay ~39s (jittered). SLAs compressed 50x so drift fires on
+# camera. Edit with care and re-run `npm run scenario:lint` — the lint enforces
+# every count, ref, and duplicate-contact claim below.
+
+id: flood-1
+title: 48 hours compressed — Bay Relief Collective flood response
+sla_multiplier: 0.02
+
+steps:
+  # --- Intake flood -------------------------------------------------------
+  - kind: intake_message
+    id: m01
+    persona: Selvi M.
+    language: ta-en
+    delay_ms: 0
+    contact: "98400 00110"
+    text: >-
+      Velachery Vijaya nagar la moonu families terrace mela maatikittu
+      irukanga, keezha thanni fast-a yeruthu, chinna kuzhandhaigalum
+      irukanga, romba neram-a saapadu illa. Food and clean water urgent-a
+      venum. Number 98400 00110.
+
+  - kind: intake_message
+    id: m02
+    persona: Ravi Kumar
+    language: en
+    delay_ms: 2600
+    contact: "98400 01123"
+    text: >-
+      Urgent - my father needs dialysis tomorrow morning and we are stuck in
+      Taramani near the MRTS station. Water is knee-deep and no transport is
+      coming. Please help. Contact 98400 01123.
+
+  - kind: intake_message
+    id: m03
+    persona: Anjali S.
+    language: en
+    delay_ms: 3200
+    contact: "98400 02245"
+    text: >-
+      A family of five is trapped on the first floor in Pallikaranai, the
+      water rose very fast. Two young children are with them and they cannot
+      get out. Please send a rescue boat. 98400 02245.
+
+  - kind: intake_message
+    id: m04
+    persona: Bala V.
+    language: ta-en
+    delay_ms: 1900
+    text: >-
+      Madipakkam 6th main road la drinking water full off aayiduchu, 20-25
+      veedu iruku, kai kuzhandhai amma ellarukkum thanni venum. Tanker
+      anuppa mudiyuma?
+
+  - kind: intake_message
+    id: m05
+    persona: Nithya R.
+    language: en
+    delay_ms: 3700
+    contact: "98400 03310"
+    text: >-
+      About 12 people from flooded ground-floor homes in Perungudi need a dry
+      place to stay tonight, including a few elderly. Any shelter space?
+      98400 03310.
+
+  - kind: intake_message
+    id: m06
+    persona: Ganesh (neighbour)
+    language: en
+    delay_ms: 2400
+    contact: "98400 01123"
+    text: >-
+      Hi, this is about the dialysis patient near Taramani MRTS - still no
+      vehicle has come and he really needs to reach the hospital by morning.
+      Same number 98400 01123.
+
+  - kind: intake_message
+    id: m07
+    persona: Shanthi P.
+    language: en
+    delay_ms: 4200
+    contact: "98400 04407"
+    text: >-
+      Need a vehicle to move an elderly couple from Adyar to their relative's
+      house on higher ground. The husband cannot walk far. 98400 04407.
+
+  - kind: intake_message
+    id: m08
+    persona: Murugan T.
+    language: ta-en
+    delay_ms: 1700
+    contact: "98400 05580"
+    text: >-
+      Adyar Kasturba nagar la oru vayasana paatti ku insulin theeri pochu,
+      sugar patient, romba weak-a irukanga, immediate-a medical help venum.
+      98400 05580 ku call pannunga.
+
+  - kind: intake_message
+    id: m09
+    persona: Vasanth
+    language: en
+    delay_ms: 3400
+    contact: "98400 06691"
+    text: >-
+      Around 40 people are sheltering in a community hall in Saidapet and
+      have not had a hot meal since yesterday. Can anyone bring cooked food?
+      98400 06691.
+
+  - kind: intake_message
+    id: m10
+    persona: Ramya K.
+    language: en
+    delay_ms: 2900
+    contact: "98400 02245"
+    text: >-
+      Please, the trapped family in Pallikaranai with the two kids still has
+      not been reached - first floor, water everywhere around the building.
+      Reachable at 98400 02245.
+
+  - kind: intake_message
+    id: m11
+    persona: Prakash D.
+    language: en
+    delay_ms: 4000
+    contact: "98400 07712"
+    text: >-
+      Elderly residents in Kodambakkam have had no drinking water for two
+      days, the taps are completely dry. We need water cans. 98400 07712.
+
+  - kind: intake_message
+    id: m12
+    persona: Kumar (passerby)
+    language: en
+    delay_ms: 1500
+    text: >-
+      Heard there are a few families stuck up on a terrace in Velachery with
+      small kids and the water is rising below them - they need food and
+      clean water fast.
+
+  - kind: intake_message
+    id: m13
+    persona: unknown caller
+    language: en
+    delay_ms: 4400
+    text: >-
+      pls help wtr coming in fast nr the ... signal weak cant type properly
+      phone dying childr
+
+  - kind: intake_message
+    id: m14
+    persona: Sridhar (hall vol.)
+    language: en
+    delay_ms: 3100
+    contact: "98400 08834"
+    text: >-
+      The temple hall in Mylapore is taking in displaced families but is
+      short on blankets and sleeping mats for tonight. 98400 08834.
+
+  # --- Volunteer actions (drive match + the hero drift->reassign) ---------
+  # Priya (cooking, Velachery) self-claims the Velachery food need m01...
+  - kind: volunteer_claim
+    volunteer_ref: SEED_U03
+    need_ref: m01
+    delay_ms: 3000
+  # ...Anitha (paramedic, Taramani) claims the critical dialysis need m02.
+  - kind: volunteer_claim
+    volunteer_ref: SEED_U01
+    need_ref: m02
+    delay_ms: 2200
+  # Priya gets stuck and releases m01 -> drift reassigns to another Velachery
+  # cook (Meena / Kavya). This is the hero moment.
+  - kind: volunteer_reply
+    volunteer_ref: SEED_U03
+    reply: release
+    delay_ms: 2600
+
+expectations:
+  # skeleton — one need per intake message.
+  - capability: skeleton
+    assert: needs_created_count
+    params: { count: 14 }
+
+  # triage — 14 needs minus 2 exact + 1 fuzzy duplicate = 11 distinct incidents;
+  # the garbled m13 routes to NEEDS_REVIEW; dialysis + trapped floor to critical.
+  - capability: triage
+    assert: distinct_needs_after_dedupe
+    params: { count: 11 }
+  - capability: triage
+    assert: needs_review_count
+    params: { count: 1 }
+  - capability: triage
+    assert: critical_severity_floor
+    params: { need_refs: [m02, m03] }
+
+  # dedupe — exact contact strings auto-link; the reworded terrace report (no
+  # contact) is only proposed for human merge. Pairs are [duplicate, original].
+  - capability: dedupe
+    assert: exact_contact_auto_link
+    params: { pairs: [[m06, m02], [m10, m03]] }
+  - capability: dedupe
+    assert: duplicate_proposed_pairs
+    params: { pairs: [[m12, m01]] }
+
+  # match — the critical dialysis need gets a full top-3 volunteer slate.
+  - capability: match
+    assert: candidates_suggested
+    params: { need_ref: m02, min_count: 3 }
+
+  # drift — the Velachery food obligation (m01) nudges before its (compressed)
+  # SLA, and reassigns once Priya releases it.
+  - capability: drift
+    assert: nudge_before_overdue
+    params: { need_ref: m01 }
+  - capability: drift
+    assert: reassign_after_release
+    params: { need_ref: m01 }
+
+  # evidence — closing m01 is blocked until the full high-severity packet
+  # (photo + locality + recipient confirm + coordinator sign-off) is present.
+  # The evidence finale is driver-driven (evaluateEvidence): the SECOND volunteer
+  # (post-reassign) delivers with photo + locality, a premature Verified is REJECTED,
+  # then recipient confirm + coordinator sign-off complete the packet → Verified → Closed.
+  - capability: evidence
+    assert: close_requires_evidence
+    params:
+      need_ref: m01
+      required: [photo, locality_confirm, recipient_confirm, coordinator_signoff]
+
+  # evidence — the full HERO chain end to end on m01, read from the ledger:
+  #   claim → at-risk nudge → release → reassign → deliver(photo+locality) →
+  #   recipient confirm → coordinator sign-off → Verified → Closed, with a complete
+  #   evidence packet, NO auto-merge, every human-gated step carrying a human actor,
+  #   and a pre-policy Verified proven REJECTED (close-gating).
+  - capability: evidence
+    assert: hero_e2e
+    params:
+      need_ref: m01
+
+  # sitrep — every {{stat:*}} token in the narrative must equal the SQL truth.
+  - capability: sitrep
+    assert: stats_match_ledger
+
+  # report — the number-integrity guard: a MockLlm that emits a hallucinated figure
+  # must be rejected and the output must fall back to the deterministic template with
+  # no stray number — a fabricated figure can never reach a donor report.
+  - capability: report
+    assert: integrity_guard
+
+  # report — the F7 PII gate: a report generated over the seeded ledger is PII-clean
+  # (assertNoPii ok) and contains none of the seed phone digits.
+  - capability: report
+    assert: no_pii
+
+  # judge (F8) — the flood injector plays all 14 intake messages through a recorder,
+  # every one under the 🧪 "Relay Simulator" identity (CLAUDE.md 10).
+  - capability: judge
+    assert: injector_posts_as_simulator
+    params: { count: 14 }
+
+  # judge (F8) — the demo reset is idempotent: run 1 clears the board, run 2 is a safe
+  # no-op, and App Home is republished both times (the <30s judge-reset budget).
+  - capability: judge
+    assert: reset_idempotent
+
+  # assistant (P1 Slack AI) — Ask-Relay names the open critical needs on the post-hero
+  # ledger, grounded and PII-free, with the count an independent recount produces.
+  - capability: assistant
+    assert: answers_open_criticals
+
+  # assistant (P1 Slack AI) — an out-of-relief-scope question is politely refused.
+  - capability: assistant
+    assert: refuses_out_of_scope
+
+  # mcp (P1) — the read-only search_needs tool (only_open + critical) equals an
+  # independent ledger recount, returns the same public ids, and leaks no PII.
+  - capability: mcp
+    assert: search_needs_matches_ledger
+
+  # live_hero (§F5) — the LIVE self-serve orchestrator (runLiveHeroDemo) drives the full
+  # signature chain against the real pipeline, with stub side effects + a virtual clock: the
+  # picked critical/high need reaches CLOSED, reassigned to a SECOND volunteer, with a complete
+  # evidence packet, an at-risk drift nudge fired through the real sweep, and every human-gated
+  # step carrying the demo coordinator. The live analog of evidence/hero_e2e.
+  - capability: live_hero
+    assert: hero_live_e2e
+
+  # live_hero — the App Home operations board (§F2) renders over the post-hero ledger with all
+  # its sections present: the attention list, the drifting-obligations panel, the filter row,
+  # and the config panel (verification policy + SLA table).
+  - capability: live_hero
+    assert: app_home_board
+
+  # degrade (Moonshot #1 — "Unplug the AI") — the flood is driven once AI-online and once with the
+  # degrade toggle ON. Honest degradation: no need is lost either way, degraded routes AT LEAST as
+  # many to NEEDS_REVIEW as AI-online, and the seam ignores a present LLM when degraded.
+  - capability: degrade
+    assert: honest_degradation
+
+  # requester_loop (Moonshot #4) — the Tamil need m01 gets a bilingual progress reply threaded back
+  # into the requester's OWN source message (Tamil then English, public id only, no PII).
+  - capability: requester_loop
+    assert: bilingual_reply_in_source_thread
+    params: { need_ref: m01 }
+
+  # agent_pledge (Moonshot #2 — "Relay holds AI agents accountable too") — an external agent pledges
+  # to fulfil the Saidapet cooked-food need m09 via pledge_support. It lands as an AGENT-actor
+  # PROPOSAL (not auto-claimed); an agent self-assign is rejected at the human gate; a human Assign
+  # commits it to the agent volunteer, and it then drifts past SLA + closes on a complete evidence
+  # packet exactly like a human promise — one path, no shortcut for the agent.
+  - capability: agent_pledge
+    assert: pledge_requires_human_confirm
+    params: { need_ref: m09 }
+
+  # counterfactual (Moonshot #3) — the measured, clearly-SIMULATED delta vs a naive group-chat
+  # baseline (published rules: docs/BASELINE-RULES.md). The baseline leaves work unclaimed +
+  # double-served and verifies nothing; Relay dedupes the known duplicate pairs and verifies. Every
+  # number comes from actually running both simulators — never fabricated, never a claim about a real
+  # deployment. Also runnable standalone via `npm run counterfactual`.
+  - capability: counterfactual
+    assert: counterfactual_beats_group_chat
+
+  # auditable_report (Moonshot #6) — the donor report's headline figures each carry a 🔍 Audit
+  # control. The evidence chain behind a verified need (buildAuditTrail over its real event log) is
+  # REDACTED to event type, evidence kind, timestamp and actor ROLE only — never a name, contact,
+  # actor id, evidence file reference, or free-text note. Proven PII-free against the seed contacts.
+  - capability: auditable_report
+    assert: audit_trail_redacted
+
+  # prewarm_backup (Moonshot) — the critical dialysis need m02, once claimed, carries a genuine
+  # pre-scored backup volunteer (the #1 alternative from the SAME deterministic scorer, the current
+  # assignee excluded), and the standby chip renders on its card. Advisory only — committing the
+  # backup is still the human-gated need_reassign_pick.
+  - capability: prewarm_backup
+    assert: backup_prewarmed
+    params: { need_ref: m02 }

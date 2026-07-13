@@ -1,0 +1,47 @@
+# Environments / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.tsbuildinfo
+
+# Data downloaded at seed time (never committed)
+seeds/data/downloads/
+
+# Playwright auth state + artifacts
+scripts/.auth/
+playwright-report/
+test-results/
+
+# Spike scratch output
+scripts/spikes/out/
+
+# Media working files
+*.mov
+*.mp4
+*.wav
+!docs/assets/*.mp4
+
+# OS / editor
+.DS_Store
+.AppleDouble
+._*
+.idea/
+*.swp
+*.log
+
+# Local Claude Code settings (personal, never shared)
+.claude/settings.local.json

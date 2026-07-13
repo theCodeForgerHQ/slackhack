@@ -1,0 +1,17 @@
+# Jurisdiction/context overlays. Effective window = max(base, every matching overlay).
+# Only VERIFIED overlays ship; the mechanism is generic so new overlays are pure data.
+version: 1
+overlays:
+  abc_bsi_headshot:
+    description: >-
+      ABC Boxer Severity Index: TKO/KO from head shots carries 45 days no-contest
+      and 30 days no sparring (a stricter overlay distinct from the core ABC guidelines).
+    source: "abcboxing.com Boxer Severity Index page (verified 2026-06)"
+    applies_when:
+      cause: head_shot_stoppage
+    competition_windows_days:
+      TKO: 45
+      KO: 60
+    no_contact_days:
+      TKO: 30
+      KO: 30

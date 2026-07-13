@@ -1,0 +1,81 @@
+[project]
+name = "cornercheck"
+version = "0.1.0"
+description = "Fail-closed fighter-clearance Slack agent"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+authors = [{ name = "Stephen Sookra" }]
+keywords = ["slack", "agent", "combat-sports", "safety", "formal-verification"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications :: Chat",
+]
+dependencies = [
+    "claude-agent-sdk>=0.2.93",
+    "fastmcp>=3.4.2",
+    "jellyfish>=1.2.1",
+    "portion>=2.6.1",
+    "psycopg-pool>=3.3.1",
+    "psycopg[binary]>=3.3.4",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.2",
+    "pyyaml>=6.0.3",
+    "slack-bolt>=1.21",
+    "slack-sdk>=3.33",
+    "z3-solver>=4.16.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "pre-commit>=4.0",
+    "hypothesis>=6.155.2",
+    "types-pyyaml>=6.0.12.20260518",
+]
+
+[project.urls]
+Homepage = "https://cornercheck.onrender.com"
+Repository = "https://github.com/StephenSook/cornercheck"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cornercheck"]
+
+[tool.pytest.ini_options]
+addopts = "-m 'not live'"
+markers = ["live: hits real external services; excluded from CI"]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+# RUF001: the spotlight defang intentionally uses look-alike angle chars (security feature).
+ignore = ["RUF001"]
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+explicit_package_bases = true
+plugins = ["pydantic.mypy"]
+check_untyped_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+[[tool.mypy.overrides]]
+module = ["portion", "portion.*", "jellyfish", "z3", "z3.*"]
+ignore_missing_imports = true

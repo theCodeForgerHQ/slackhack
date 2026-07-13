@@ -1,0 +1,11 @@
+# gitleaks config. Real secrets never enter the repo (.env is gitignored; runtime secrets
+# live only in the Render dashboard). .env.example holds PLACEHOLDERS by design, so its
+# high-entropy stand-ins are allowlisted to avoid false positives.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "placeholders in the committed env template"
+paths = [
+  '''\.env\.example''',
+]

@@ -1,0 +1,14 @@
+{
+ "alpha": 0.05,
+ "n": 4203,
+ "q_hat": 0.05636363636363628,
+ "score_floor": 0.9436363636363637,
+ "holdout_n": 4195,
+ "holdout_coverage": 0.9507,
+ "seed": 42,
+ "fighters": 4123,
+ "variant_scheme": "exact + one-edit typo + middle-token drop (names with 3+ tokens)",
+ "score_fn": "er.live_match.score_names (normalized exact -> 1.0, else Jaro-Winkler)",
+ "generated": "2026-06-09T21:45:17+00:00",
+ "guarantee": "split conformal: P(true fighter's score >= score_floor) >= 1 - alpha, marginal over exchangeable queries, conditional on retrieval"
+}

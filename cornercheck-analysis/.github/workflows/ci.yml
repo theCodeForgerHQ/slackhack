@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked
+      - run: uv run mypy src tests
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cornercheck
+          POSTGRES_PASSWORD: cornercheck
+          POSTGRES_DB: cornercheck
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U cornercheck"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://cornercheck:cornercheck@localhost:5432/cornercheck
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked
+      - name: Apply migrations (same SQL production runs)
+        shell: bash
+        run: |
+          shopt -s nullglob
+          files=(src/cornercheck/db/migrations/*.sql)
+          if [ ${#files[@]} -gt 0 ]; then
+            for f in "${files[@]}"; do
+              psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+            done
+          else
+            echo "no migrations yet"
+          fi
+      - run: uv run pytest --cov=cornercheck --cov-report=term
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked
+      - run: uv build
+      - run: uv run python -c "import cornercheck; print(cornercheck.__version__)"
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
