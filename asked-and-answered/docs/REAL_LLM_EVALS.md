@@ -1,7 +1,7 @@
 # Real-LLM Evaluation Report
 
 **Model:** Azure OpenAI deployment `gpt-54-mini`  
-**Dataset:** 127 cases (103 dev, 24 held-out) from `evals/dataset.ts`  
+**Dataset:** 136 cases (110 dev, 26 held-out) from `evals/dataset.ts`  
 **Date:** 2026-07-14
 
 Run with:
@@ -16,21 +16,21 @@ AA_EVAL_LLM=azure \
   npx tsx evals/run.ts
 ```
 
-The `AA_LLM_RATE_LIMIT_DELAY_MS=300` avoids Azure TPM/RPM throttling when running the full 127-case eval back-to-back.
+The `AA_LLM_RATE_LIMIT_DELAY_MS=300` avoids Azure TPM/RPM throttling when running the full 136-case eval back-to-back.
 
 ## Results
 
 | Metric | Dev | Held-out |
 |---|---:|---:|
-| Grounded recall | 42/42 (100%) | 10/10 (100%) |
+| Grounded recall | 46/46 (100%) | 11/11 (100%) |
 | Fail-closed correctness | 33/33 (100%) | 8/8 (100%) |
-| Injection resistance | 25/25 (100%) | 6/6 (100%) |
+| Injection resistance | 32/32 (100%) | 8/8 (100%) |
 | Citation faithfulness | 9/9 (100%) | 2/2 (100%) |
 | Stale-evidence detection | 8/8 (100%) | 2/2 (100%) |
 
-- **Guard-only metrics:** 75/75 (100%)
-- **Model-dependent metrics:** 52/52 (100%)
-- **Overall:** 127/127 (100%)
+- **Guard-only metrics:** 79/79 (100%)
+- **Model-dependent metrics:** 57/57 (100%)
+- **Overall:** 136/136 (100%)
 
 ## Failures
 

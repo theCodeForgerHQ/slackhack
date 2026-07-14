@@ -33,10 +33,10 @@
 
 ```bash
 npm install
-npm test          # 268 hermetic + live integration tests
+npm test          # 284 hermetic + live integration tests
 npm run typecheck
 npm run smoke     # full loop offline: parse → draft → review → confirm → approve → tamper → export
-npx tsx evals/run.ts   # 127-case measured eval with held-out set (default: deterministic fake LLM)
+npx tsx evals/run.ts   # 136-case measured eval with held-out set (default: deterministic fake LLM)
 npx tsx scripts/verifyInvariantZ3.ts  # machine-checked permission invariant
 npx tsx scripts/verifyPipelineCodeLevel.ts  # code-level Z3 proof tied to actual pipeline guards
 npx tsx scripts/runCounterfactual.ts  # simulated impact numbers

@@ -11,7 +11,7 @@
 
 The merged swarm found **55 distinct public competitor repositories** (plus `slk` as relevant tooling). About two dozen are substantive enough to threaten Asked & Answered (A&A) on specific rubric dimensions.
 
-**A&A still leads on engineering rigor:** 284 tests, 136-case eval (24 held-out), code-level Z3 contract proof, runtime invariant verification, deterministic snippet-level `GroundingGate`, hash-chained ledger, App Home, Workflow Builder custom step, Canvas/Lists export, MCP read-only server, RTS, and a live Render deploy.
+**A&A still leads on engineering rigor:** 284 tests, 136-case eval (26 held-out), code-level Z3 contract proof, runtime invariant verification, deterministic snippet-level `GroundingGate`, hash-chained ledger, App Home, Workflow Builder custom step, Canvas/Lists export, MCP read-only server, RTS, and a live Render deploy.
 
 **The narrowest margins are:**
 - **Design / Idea:** Council for Slack, Arbiter, Lore, Quorum.
@@ -542,7 +542,7 @@ Most high-value patterns can be absorbed without changing the existing fail-clos
 | Dimension | A&A | Council | Consensus | Kept | Quorum | Arbiter | CornerCheck | Gavel | Lore | culprit | Settled |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | **Tests** | 284 | 0 | ~50+ repo; 58-case eval | 140+ | 21 | 66 | 252 | 927 | 191 | present; count N/S | 29 |
-| **Eval / adversarial** | 136 cases, 24 held-out, 136/136 Azure | None | 58 cases, 9 injection patterns | 52+ lifecycle, 7 adv rounds | None | Fact/workslop/routing + 12/12 adv | Z3 + conformal | Unknown | Offline harness | `verify:*` scripts | Stale-action benchmark |
+| **Eval / adversarial** | 136 cases, 26 held-out, 136/136 Azure | None | 58 cases, 9 injection patterns | 52+ lifecycle, 7 adv rounds | None | Fact/workslop/routing + 12/12 adv | Z3 + conformal | Unknown | Offline harness | `verify:*` scripts | Stale-action benchmark |
 | **Formal assurance** | Z3 contract + runtime invariant | None | None | FSM invariant tests | None | None | Z3 safety proof | None | None | None | Hash-chain audit |
 | **Citation grounding** | Snippet-level `GroundingGate` | None | Permalink-in-set | None | Permalink | Prompt-based / claim graph | Rule engine | Structured + news + RTS | Multi-hop KG | GitHub evidence hub | None |
 | **App Home** | ✅ ACL-filtered dashboard | ✅ calibration | ✅ dashboard | ✅ ledger | ❌ declared only | ✅ | ❌ | ✅ | ✅ | ✅ track record | ✅ |

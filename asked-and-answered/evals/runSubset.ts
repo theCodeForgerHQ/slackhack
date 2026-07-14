@@ -1,7 +1,7 @@
 /**
  * Real-LLM eval on a representative subset of the full dataset.
  *
- * Use this when the full 127-case run is too slow due to provider rate limits.
+ * Use this when the full 136-case run is too slow due to provider rate limits.
  * The subset preserves all categories: grounded recall, fail-closed, ACL
  * degradation, injection (refuse + grounded), citation faithfulness (fabricator),
  * stale evidence, and near-miss/scope carve-outs.

@@ -5,7 +5,7 @@
  * this script derives impact inputs from the actual implementation:
  *
  *   - Smoke questionnaire counts (fresh run + compounding run).
- *   - 127-case eval pass rates with the deterministic fake LLM.
+ *   - 136-case eval pass rates with the deterministic fake LLM.
  *   - Local load-benchmark latency percentiles and throughput.
  *   - Counterfactual ROI computed from the observed auto-answer rate.
  *
@@ -256,7 +256,7 @@ function buildReport(smoke: MeasuredImpactReport['smoke'], evalMetrics: Measured
         },
       },
       adversarial: {
-        basis: `127-case eval measured auto-answer rate: ${evalMetrics.autoAnsweredRatePct}% (adversarial/hold-out set designed to stress fail-closed guards).`,
+        basis: `136-case eval measured auto-answer rate: ${evalMetrics.autoAnsweredRatePct}% (adversarial/hold-out set designed to stress fail-closed guards).`,
         per100Questions: {
           smeHoursSaved: adversarialRoi.smeHoursSaved,
           smeCostSavedUsd: adversarialRoi.smeCostSavedUsd,

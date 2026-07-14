@@ -12,7 +12,7 @@
 
 Asked & Answered ties Council for Slack at **17 / 20** and wins on the **Technological Implementation** tie-break. Consensus is third at 16. Quorum and Arbiter tie at 14.
 
-The win is narrow: Council has the stronger demo narrative, UX breadth, and idea novelty (multi-persona council scored against reality), but its public repository contains **zero automated tests** and no eval harness. A&A’s engineering evidence — 268 tests, 127-case eval, real-LLM Azure result, Z3 contract proof + runtime invariant verification — is decisive under the published tie-break order.
+The win is narrow: Council has the stronger demo narrative, UX breadth, and idea novelty (multi-persona council scored against reality), but its public repository contains **zero automated tests** and no eval harness. A&A’s engineering evidence — 284 tests, 136-case eval, real-LLM Azure result, Z3 contract proof + runtime invariant verification — is decisive under the published tie-break order.
 
 | Rank | Submission | Tech | Design | Impact | Idea | Total |
 |---:|:---|---:|---:|---:|---:|---:|
@@ -28,7 +28,7 @@ The win is narrow: Council has the stronger demo narrative, UX breadth, and idea
 
 | Submission | Public URL | Inspection notes |
 |---|---|---|
-| Asked & Answered | `https://github.com/theCodeForgerHQ/slackhack` (`asked-and-answered/`) | Full working tree inspected; 268 tests, 127-case eval, Z3 proofs, runtime invariant, landing page, OAuth, capability probes, watcher, run cards. |
+| Asked & Answered | `https://github.com/theCodeForgerHQ/slackhack` (`asked-and-answered/`) | Full working tree inspected; 284 tests, 136-case eval, Z3 proofs, runtime invariant, landing page, OAuth, capability probes, watcher, run cards. |
 | Council for Slack | `https://github.com/alex-jb/council-for-slack-2026` | README, web package, case studies, manifest, MCP wrapper inspected. **No test files found.** |
 | Consensus | `https://github.com/BitTriad/consensus-slack-agent` | 58-case eval, delimiter-break attacks, NFKC normalization, membership gate, multi-backend ledger inspected. |
 | Quorum | `https://github.com/OrionArchitekton/quorum-slack-agent` | README, architecture, workflow code, 19 unit + 2 integration tests, live deploy health check inspected. |
@@ -40,7 +40,7 @@ The win is narrow: Council has the stronger demo narrative, UX breadth, and idea
 
 ### Asked & Answered — 17 / 20
 
-- **Technological Implementation: 5** — 268 passing tests, 127-case eval (103 dev, 24 held-out), 127/127 on Azure `gpt-54-mini`, code-level Z3 contract proof of the permission invariant, runtime invariant verification over all 127 eval cases, GroundingGate, event-sourced hash-chained ledger, multi-workspace OAuth, capability probes, delta-scoped RTS cache, proactive stale/contradiction watcher, signed Agent Run Cards.
+- **Technological Implementation: 5** — 284 passing tests, 136-case eval (110 dev, 26 held-out), 136/136 on Azure `gpt-54-mini`, code-level Z3 contract proof of the permission invariant, runtime invariant verification over all 136 eval cases, GroundingGate, event-sourced hash-chained ledger, multi-workspace OAuth, capability probes, delta-scoped RTS cache, proactive stale/contradiction watcher, signed Agent Run Cards.
 - **Design: 4** — Polished public landing page with case-study pages, App Home, Data Table review modal, Canvas/Lists/xlsx exports, Block Kit cards, Workflow Builder step. Point off because Canvas/Lists require additional bot scopes and Data Table blocks do not render in DMs.
 - **Potential Impact: 4** — Quantified ROI model, compounding answer library, documented pilot scenarios, load benchmark, real-LLM validation. Point off because case studies are composite pilots, not live customer deployments.
 - **Quality of the Idea: 4** — Fail-closed compliance memory with a machine-checked permission invariant is sharp and defensible. Point off because org-memory agents are an established category; novelty is mostly in the safety engineering.
@@ -79,13 +79,13 @@ The win is narrow: Council has the stronger demo narrative, UX breadth, and idea
 
 | Dimension | Asked & Answered | Council | Consensus | Quorum | Arbiter |
 |---|---|---|---|---|---|
-| **Automated tests** | 268 | **0** | ~50+ | 21 | 66 |
-| **Eval / adversarial dataset** | 127 cases, 24 held-out, real-LLM Azure | None | 58 cases, delimiter/injection patterns | None | ~30 small benchmarks |
+| **Automated tests** | 284 | **0** | ~50+ | 21 | 66 |
+| **Eval / adversarial dataset** | 136 cases, 26 held-out, real-LLM Azure | None | 58 cases, delimiter/injection patterns | None | ~30 small benchmarks |
 | **Formal assurance** | Z3 contract proof + runtime invariant | None | None | None | None |
 | **Deterministic grounding** | GroundingGate (snippet-level) | None | Permalink-in-set | Permalink citations | Prompt-based |
 | **Multi-workspace install** | Yes (`/slack/install`) | Yes | No | No | No |
 | **Public landing page** | Yes (Vercel) | Yes | No | No | No |
-| **Real-LLM validation** | Azure `gpt-54-mini` 127/127 | No | Yes (published) | No | No |
+| **Real-LLM validation** | Azure `gpt-54-mini` 136/136 | No | Yes (published) | No | No |
 | **Proactive stale detection** | Watcher scans library | No | Contradiction alerts | No | No |
 | **Signed audit artifacts** | Agent Run Cards | No | No | No | No |
 | **Idea novelty** | Fail-closed compliance memory | Multi-persona Brier council | Contradiction firewall | Durable provenance | Multi-agent judgment |

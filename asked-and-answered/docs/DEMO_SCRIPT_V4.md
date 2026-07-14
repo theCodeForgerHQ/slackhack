@@ -1,10 +1,10 @@
-# Asked & Answered — Explainer Demo Script v3
+# Asked & Answered — Explainer Demo Script v4
 ## "The Slack Agent That Refuses to Lie"
 
-**Target length:** 3 minutes (180 s) — hard cut  
+**Target length:** 3 minutes 10 seconds (190 s) — hard ceiling  
 **Format:** Movie script with timestamp, voiceover, and exact on-screen actions.  
 **Framing:** Google XYZ — every beat states the problem (X), the action (Y), and the measurable outcome (Z).  
-**Goal:** Undisputed win on Impact, Design, and Idea by dramatizing engineering proof inside a human story.
+**Goal:** Undisputed win on Impact, Design, and Idea by dramatizing the permission invariant — the one thing competitors cannot copy.
 
 ---
 
@@ -37,7 +37,7 @@
 
 ---
 
-## 0:24 — 0:40 | THE UPLOAD: Questions in, plan out
+## 0:24 — 0:38 | THE UPLOAD: Questions in, plan out
 
 **VOICEOVER:**  
 "Alice drags the questionnaire into Asked & Answered. It streams a plan she can read."
@@ -61,7 +61,7 @@
 
 ---
 
-## 0:40 — 1:05 | THE REVIEW TABLE: Three states, one rule
+## 0:38 — 1:02 | THE REVIEW TABLE: Three states, one rule
 
 **VOICEOVER:**  
 "Every row lands in one of three states. Verified. Grounded. Or Needs SME. There is no fourth state called 'guess.'"
@@ -86,14 +86,39 @@
 
 ---
 
-## 1:05 — 1:25 | THE CONTRAST: What RAG does vs. what we do
+## 1:02 — 1:22 | THE PERMISSION INVARIANT: Alice can't see it, so she can't get it
 
 **VOICEOVER:**  
-"A RAG bot would have invented something for cyber liability insurance. Asked & Answered refuses."
+"This is the moat. An approved answer exists, but its evidence lives in a private channel Alice cannot see. Asked & Answered degrades it to Needs SME."
+
+**ON SCREEN:**  
+- Cursor hovers over a new row: *Production data hosted in EU?* Status flips from **Verified** → **Needs SME**.
+- Tooltip appears: *"Citation #security-eu-region is not visible to you. Answer withheld."*
+
+**ACTION:**  
+1. Cursor clicks **Review** on the row.  
+- Modal opens with empty answer field and text:
+
+> **Answer withheld.**
+> You cannot see all evidence backing this approved answer.
+> Routed to @security-sme.
+
+**VOICEOVER:**  
+"No answer text ever flows to a requester who cannot see all of its evidence. Re-checked on every read."
+
+**XYZ FRAMING overlay:**  
+> A verified answer's evidence is invisible to the requester (X); the agent withholds the answer (Y), enforcing the permission invariant on every reuse (Z).
+
+---
+
+## 1:22 — 1:42 | FAIL-CLOSED: No evidence, no answer
+
+**VOICEOVER:**  
+"And when there is no evidence at all, the agent refuses to invent one."
 
 **ON SCREEN:**  
 - Cursor clicks **Review** on the *cyber liability insurance* row.  
-- Modal opens. The answer field is empty. Large text:
+- Modal opens. Empty answer field. Large text:
 
 > **No evidence found. No answer given.**
 > Routed to @finance-sme for approval.
@@ -110,7 +135,7 @@
 
 ---
 
-## 1:25 — 1:45 | APPROVE ONCE, REUSE FOREVER: The compounding payoff
+## 1:42 — 2:00 | APPROVE ONCE, REUSE FOREVER
 
 **VOICEOVER:**  
 "When Alice approves an answer, it becomes a reusable asset."
@@ -131,7 +156,7 @@
 
 ---
 
-## 1:45 — 2:00 | THE PROOF: Alice verifies the chain
+## 2:00 — 2:10 | THE PROOF: One cut to verified
 
 **VOICEOVER:**  
 "Alice doesn't have to trust the bot. She verifies the chain herself."
@@ -139,44 +164,37 @@
 **ON SCREEN:**  
 - In the confirmation card, cursor clicks **Verify ledger**.  
 - Browser opens to `https://asked-and-answered-app.onrender.com/verify-ledger`.  
-- Page shows: **Ledger integrity: VERIFIED** · 8 entries · chain hash intact · last entry #7.
+- Page shows: **Ledger integrity: VERIFIED** · 8 entries · chain hash intact.
 
 **ACTION:**  
 1. Cursor clicks **Verify ledger** link.  
-2. Browser tab opens. Green **VERIFIED** badge fills the screen for one second.
+2. Green **VERIFIED** badge fills the screen for one second. Cut.
 
 **XYZ FRAMING overlay:**  
 > Every approval event (X) is written to a public, tamper-evident ledger (Y), so Alice can verify integrity without trusting the host (Z).
 
 ---
 
-## 2:00 — 2:15 | EXPORT & SEND: Ready for the customer
+## 2:10 — 2:22 | EXPORT & SEND: Ready for the customer
 
 **VOICEOVER:**  
-"When Alice exports, the questionnaire carries its own proof — straight to the customer."
+"Alice exports the questionnaire — with citations and approvals — straight to the customer."
 
 **ON SCREEN:**  
 - Cursor clicks **Export & send** under the review table.  
-- A Slack compose window opens with the exported `.xlsx` attached and a pre-filled message: *"Security questionnaire with citations and approvals."*  
-- Cursor clicks **Send**.  
-- Cut to recipient opening the file. Columns:
-  - Question
-  - Answer
-  - Status
-  - Evidence links
-  - Approved by
-  - Ledger entry
+- A Slack compose window opens with the exported `.xlsx` attached.  
+- Cursor clicks **Send**.
 
 **ACTION:**  
-1. Cursor clicks an **Evidence link** cell → opens original Slack message.  
-2. Cursor clicks a **Ledger entry** cell → opens public verifier.
+1. Cut to recipient opening the file.  
+2. Cursor clicks an **Evidence link** cell → opens original Slack message.
 
 **XYZ FRAMING overlay:**  
 > The finished artifact (X) carries its own provenance (Y), so customers and auditors see where every answer came from (Z).
 
 ---
 
-## 2:15 — 2:35 | THE CLIFFHANGER: Stale answer, caught early
+## 2:22 — 2:38 | THE CLIFFHANGER: Stale answer, caught early
 
 **VOICEOVER:**  
 "Three months later, new evidence contradicts an approved answer. Before the customer notices, the agent flags it."
@@ -199,33 +217,27 @@
 
 ---
 
-## 2:35 — 2:50 | THE SAFETY REPORT: Alice proves it to her CISO
+## 2:38 — 2:48 | THE SAFETY REPORT: Five seconds of proof
 
 **VOICEOVER:**  
-"When her CISO asks how she knows it's safe, Alice shows him the proof."
+"When her CISO asks how she knows it's safe, Alice shows him one number."
 
 **ON SCREEN:**  
-- Back in the confirmation card, cursor clicks **Safety report**.  
-- Browser opens to `https://asked-and-answered-app.onrender.com/safety-report`.  
-- Page displays:
-  - **Automated tests:** 284 / 284
-  - **Eval harness:** 136 / 136
-  - **Permission invariant:** 0 violations
-  - **Z3 proof:** PROVED
-  - **Smoke test:** PASS
-  - **Throughput:** 28,241 q/sec
+- Alice clicks **Safety report**. Browser opens to `/safety-report`.
+- One metric card animates in: **Z3 proof: PROVED**.
+- CISO's Slack reaction: ✅
 
 **ACTION:**  
 1. Cursor clicks **Safety report** link.  
-2. Browser tab opens. Page animates each metric card filling in green.  
-3. Cursor scrolls to the **Reproduce it** section.
+2. Browser opens. Single green card: **Z3 proof: PROVED**.  
+3. Cut back to Alice.
 
 **XYZ FRAMING overlay:**  
-> We ship evidence (X): tests, eval, code-level Z3 proof, and live verifiers (Y), so safety claims are reproducible, not just promised (Z).
+> The safety claim (X) is machine-proved (Y), so trust is reproducible, not promised (Z).
 
 ---
 
-## 2:50 — 3:00 | CLOSE: The agent that refuses to lie
+## 2:48 — 3:00 | CLOSE: The agent that refuses to lie
 
 **VOICEOVER:**  
 "Asked & Answered. The Slack agent that refuses to lie."
@@ -251,25 +263,23 @@
 
 ## PRODUCTION NOTES
 
-- **Hard 3:00 ceiling.** If any beat runs long, trim the safety-report scroll before trimming the human beats.
-- **No motion graphics.** Every action is a real click, scroll, or keystroke in Slack or the browser.
+- **Hard ceiling 3:10.** If recording runs long, trim the export beat before the safety report.
+- **No motion graphics.** Every action is a real click, scroll, or keystroke.
 - **1080p, 60fps, highlighted cursor.**
-- **Voiceover pace:** ~150 words/minute; script is ~460 words.
-- **Music:** tension under the RAG-bot contrast; resolve on "No evidence found. No answer given."
-- **Props needed:**
-  - `/safety-report` page live on Render
-  - **Safety report** link in the approval confirmation card (or App Home)
-  - **Export & send** action under the review table
+- **Voiceover pace:** ~150 words/minute; script is ~485 words.
+- **Music:** tension under RAG-bot contrast and ACL-redaction; resolve on "No evidence found. No answer given."
 
 ## RUBRIC SCORING MAP
 
-| Rubric | How v3 scores it |
+| Rubric | How v4 scores it |
 |---|---|
-| **Impact** | Alice's emotional arc, quantified savings, compounding reuse, stale-answer catch, export-to-customer payoff. |
-| **Design** | 3-state UX, fail-closed modal, streaming plan, one-cut verifier, App Home cliffhanger, safety report as proof. |
-| **Idea** | "The Slack agent that refuses to lie" — memorable, bounded, safety-first, morally coherent. |
-| **Tech** | Safety report dramatizes tests/eval/Z3 proof as part of Alice's workflow, not an engineering detour. |
+| **Impact** | Alice's arc, quantified savings, compounding reuse, stale-answer catch, export-to-customer payoff. |
+| **Design** | 3-state UX, fail-closed modal, ACL-redaction beat, streaming plan, one-cut verifier, App Home cliffhanger. |
+| **Idea** | "The Slack agent that refuses to lie" + permission invariant as the moat. |
+| **Tech** | Safety report shows Z3 proof; ACL-redaction dramatizes the machine-checked invariant. |
 
-## FROM REVIEWER FEEDBACK
+## CHANGES FROM v3
 
-v2 scored 5/5 Impact, 5/5 Idea, 4/5 Design, 4/5 Tech. The remaining gap was that the engineering-proof beat sat outside Alice's narrative. v3 fixes this by turning the terminal command list into a **Safety report** that Alice shows her CISO, making technological implementation part of the human story.
+1. **Added permission-invariant beat (1:02–1:22).** Shows an approved answer being withheld because the requester cannot see the evidence — the single most defensible advantage over Consensus and Arbiter.
+2. **Shortened safety report (2:38–2:48).** One card, one proof, one reaction. No scrolling through metrics.
+3. **Tightened export beat (2:10–2:22).** Export & send in one action, then cut to recipient.

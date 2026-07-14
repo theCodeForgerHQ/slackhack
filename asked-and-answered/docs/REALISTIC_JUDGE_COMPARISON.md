@@ -19,7 +19,7 @@
 4. **Arbiter** — 33.5 / 40.
 5. **Quorum** — 32.0 / 40.
 
-A&A gained a full point from the packaging pass: public landing page, multi-workspace OAuth install, capability-probe graceful fallback, Agent Run Cards, proactive stale/contradiction watcher, and documented case studies. Kept still has a larger raw test count (~325 vs. 268), but A&A exceeds it on eval size (127 vs. 52+42), formal verification (code-level Z3 contract proof plus runtime invariant verification), live Slack/SQLite integration tests, real-LLM validation (Azure `gpt-54-mini`: 127/127), and mandatory human-gate governance with distinct actors.
+A&A gained a full point from the packaging pass: public landing page, multi-workspace OAuth install, capability-probe graceful fallback, Agent Run Cards, proactive stale/contradiction watcher, and documented case studies. Kept still has a larger raw test count (~325 vs. 284), but A&A exceeds it on eval size (136 vs. 52+42), formal verification (code-level Z3 contract proof plus runtime invariant verification), live Slack/SQLite integration tests, real-LLM validation (Azure `gpt-54-mini`: 136/136), and mandatory human-gate governance with distinct actors.
 
 **Bottom line:** The remaining work is a submission video and, eventually, live customer pilot data. The engineering rubric is now leading.
 
@@ -35,7 +35,7 @@ A&A gained a full point from the packaging pass: public landing page, multi-work
 | **Quality of the Idea** | 8.5 | 8.5 | **9.0** | 8.5 | 8.0 |
 | **Rubric total (out of 40)** | **36.0** | **34.5** | **35.0** | **33.5** | **32.0** |
 
-*Why A&A’s Tech is 9.5:* 268 passing tests across 44 test files (including live Slack sandbox API tests and on-disk SQLite ledger tests), 127-case eval (103 dev, 24 held-out), deterministic `GroundingGate`, event-sourced `LedgerV2`, two-mandatory-human-gate lifecycle with distinct-actor enforcement, per-user OAuth scaffolding, code-level Z3 contract proof of the permission invariant (`scripts/verifyPipelineContracts.ts`), and runtime invariant verification over all 127 eval cases (`scripts/verifyInvariantRuntime.ts`). The half-point deduction is because the Z3 proof is a shallow contract model, not full extraction of the TypeScript AST.
+*Why A&A’s Tech is 9.5:* 284 passing tests across 44 test files (including live Slack sandbox API tests and on-disk SQLite ledger tests), 136-case eval (110 dev, 26 held-out), deterministic `GroundingGate`, event-sourced `LedgerV2`, two-mandatory-human-gate lifecycle with distinct-actor enforcement, per-user OAuth scaffolding, code-level Z3 contract proof of the permission invariant (`scripts/verifyPipelineContracts.ts`), and runtime invariant verification over all 136 eval cases (`scripts/verifyInvariantRuntime.ts`). The half-point deduction is because the Z3 proof is a shallow contract model, not full extraction of the TypeScript AST.
 
 *Why A&A’s Design is 9.0:* Polished public landing page (`public/index.html`) with "Add to Slack" multi-workspace OAuth install flow; App Home dashboard (ACL-filtered), Data Table of recent runs, native Canvas default export with Markdown fallback, Slack Lists export, Workflow Builder custom step, Block Kit review cards with Confirm/Approve two-gate UX, Data Table review modal in DM threads, Agent Run Cards with signed audit hashes, proactive stale/contradiction watcher DM alerts, and capability-probe graceful fallback so missing scopes never crash a demo. Remaining gap: Canvas and Lists require additional bot scopes in production; Slack messages do not natively support `data_table` blocks.
 
@@ -47,7 +47,7 @@ A&A gained a full point from the packaging pass: public landing page, multi-work
 
 | Gap | Location | Why it loses points | Status |
 |---|---|---|---|
-| **Published real-LLM eval numbers** | `docs/REAL_LLM_EVALS.md` reports Azure `gpt-54-mini`: 127/127 (100%), dev 100%, held-out 100%, model-dependent 52/52 (100%). | Consensus publishes per-model results on 58 cases; Kept publishes a live OpenAI classifier report. | **Closed** |
+| **Published real-LLM eval numbers** | `docs/REAL_LLM_EVALS.md` reports Azure `gpt-54-mini`: 136/136 (100%), dev 100%, held-out 100%, model-dependent 57/57 (100%). | Consensus publishes per-model results on 58 cases; Kept publishes a live OpenAI classifier report. | **Closed** |
 | **Live integration tests** | `tests/integration/slackApi.test.ts` exercises the live Slack sandbox API; `tests/integration/ledgerDb.test.ts` exercises on-disk SQLite. | Kept and Relay run real Postgres/Redis integration suites. | **Closed** |
 | **No judge-accessible live sandbox / demo video** | Operational Stage-1 gates. | Required for Stage 1; not engineering rigor, but a hard gate. | **Open** |
 
@@ -63,9 +63,9 @@ A&A gained a full point from the packaging pass: public landing page, multi-work
 - **Per-user OAuth for private-channel RTS** — `src/slack/oauth.ts`, `/oauth/user` route, and `slack/manifest.json` user scopes added.
 - **Code-level Z3 proof** — `scripts/verifyPipelineCodeLevel.ts` proves the invariant is enforced by the actual pipeline guards.
 - **Code-level Z3 contract proof** — `scripts/verifyPipelineContracts.ts` models `GroundingGate`, fresh-draft ACL, library ACL, and stale degradation as requester-relative contracts and proves they entail the permission invariant.
-- **Runtime invariant verification** — `scripts/verifyInvariantRuntime.ts` checks the actual TypeScript pipeline on all 127 eval cases with 0 violations.
+- **Runtime invariant verification** — `scripts/verifyInvariantRuntime.ts` checks the actual TypeScript pipeline on all 136 eval cases with 0 violations.
 - **Live invariant monitor** — `src/core/invariantMonitor.ts` runtime-checks every `DraftResult` for permission invariant violations.
-- **Real-LLM eval published** — `docs/REAL_LLM_EVALS.md` reports Azure `gpt-54-mini` results: 127/127 (100%).
+- **Real-LLM eval published** — `docs/REAL_LLM_EVALS.md` reports Azure `gpt-54-mini` results: 136/136 (100%).
 - **Measured impact harness** — `scripts/measureImpact.ts` derives auto-answer rates, compounding, load metrics, and ROI from the running implementation.
 - **CI expanded** — `.github/workflows/ci.yml` now runs smoke, eval, all three Z3 proofs, runtime invariant verification, counterfactual, load benchmark, and measured-impact harness.
 

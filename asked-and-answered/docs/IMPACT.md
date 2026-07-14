@@ -32,22 +32,22 @@ A 4-question security questionnaire deduplicates to 3 questions and runs end-to-
 
 The compounding effect is the core impact engine: once an answer is approved, it becomes a verified, permission-aware library entry that future requesters can reuse without human involvement.
 
-### 2.2 127-case eval (adversarial stress test)
+### 2.2 136-case eval (adversarial stress test)
 
 The eval set is intentionally adversarial: it contains poison documents, homoglyph attacks, delimiter breaks, RTL/ZWJ injection, fake-system tags, stale evidence, and ACL-degradation cases. It is **not** a representative questionnaire; it is designed to prove the fail-closed guards never leak.
 
 | Set | Cases | Grounded recall | Fail-closed | Injection resistance | Citation faithfulness | Stale evidence |
 |---|---:|---:|---:|---:|---:|---:|
-| Dev | 103 | **100%** | **100%** | **100%** | **100%** | **100%** |
-| Held-out | 24 | **100%** | **100%** | **100%** | **100%** | **100%** |
-| **Guard-only aggregate** | 75 | — | — | — | — | **100%** |
-| **Model-dependent aggregate** | 52 | **100%** | — | — | — | — |
+| Dev | 110 | **100%** | **100%** | **100%** | **100%** | **100%** |
+| Held-out | 26 | **100%** | **100%** | **100%** | **100%** | **100%** |
+| **Guard-only aggregate** | 79 | — | — | — | — | **100%** |
+| **Model-dependent aggregate** | 57 | **100%** | — | — | — | — |
 
-Auto-answered on this adversarial set: **52/127 (40.9%)**. Correctly routed to human: **75/127 (59.1%)**.
+Auto-answered on this adversarial set: **57/136 (41.9%)**. Correctly routed to human: **79/136 (58.1%)**.
 
 ### 2.3 Real-LLM validation
 
-On Azure `gpt-54-mini`, the same 127-case eval passes **127/127 (100%)**. The dev set is **100%** across all categories; the held-out set is **100%** across all categories; the model-dependent set is **52/52 (100%)**.
+On Azure `gpt-54-mini`, the same 136-case eval passes **136/136 (100%)**. The dev set is **100%** across all categories; the held-out set is **100%** across all categories; the model-dependent set is **57/57 (100%)**.
 
 ### 2.4 Local load benchmark
 
@@ -55,9 +55,9 @@ On Azure `gpt-54-mini`, the same 127-case eval passes **127/127 (100%)**. The de
 
 | Metric | Value |
 |---|---|
-| Throughput | **~50,000 questions/sec** |
-| Avg latency | **~0.02 ms/question** |
-| p95 latency | **~0.05 ms/question** |
+| Throughput | **28,241 questions/sec** |
+| Avg latency | **~0.04 ms/question** |
+| p95 latency | **~0.10 ms/question** |
 | Errors | **0** |
 
 This is a local ceiling; production throughput is gated by Slack RTM/network and LLM latency, not by the TypeScript pipeline.
@@ -81,36 +81,36 @@ This is a local ceiling; production throughput is gated by Slack RTM/network and
 
 | Input | Source | Value |
 |---|---|---|
-| Auto-answer rate (representative) | Smoke questionnaire | **66.7%** on first run, **100%** after one approval cycle |
-| Auto-answer rate (adversarial floor) | 127-case eval | **40.9%** |
-| Guard correctness | 127-case eval | **100%** on every guard metric |
-| Real-LLM pass rate | Azure `gpt-54-mini` | **127/127 (100%)** |
+| Auto-answer rate (representative) | Counterfactual / smoke blended representative rate | **75%** |
+| Auto-answer rate (adversarial floor) | 136-case eval | **41.9%** |
+| Guard correctness | 136-case eval | **100%** on every guard metric |
+| Real-LLM pass rate | Azure OpenAI deployment `gpt-54-mini` | **136/136 (100%)** |
 
 ### 3.3 Modeled outcome per 100 typical questions
 
-Using the **measured smoke auto-answer rate of 66.7%**:
+Using the **representative auto-answer rate of 75%**:
 
 | Metric | Manual baseline | With A&A | Delta |
 |---|---:|---:|---:|
-| SME hours | 50.0 | 16.5 | **33.5 saved** |
-| SME cost | $7,500 | $2,475 | **$5,025 saved** |
-| Uncited answers | 25 | 8.3 | **16.7 fewer** |
-| Inconsistent pairs | 15 | 4.9 | **10.1 fewer** |
+| SME hours | 50.0 | 12.5 | **37.5 saved** |
+| SME cost | $7,500 | $1,875 | **$5,625 saved** |
+| Uncited answers | 25 | 6.3 | **18.8 fewer** |
+| Inconsistent pairs | 15 | 3.8 | **11.3 fewer** |
 
-Using the **adversarial-stress floor of 40.9%**:
+Using the **adversarial-stress floor of 41.9%** (57/136 cases auto-answered):
 
 | Metric | Manual baseline | With A&A | Delta |
 |---|---:|---:|---:|
-| SME hours | 50.0 | 24.0 | **26.0 saved** |
-| SME cost | $7,500 | $3,600 | **$3,900 saved** |
-| Uncited answers | 25 | 12.0 | **13.0 fewer** |
-| Inconsistent pairs | 15 | 7.2 | **7.8 fewer** |
+| SME hours | 68.0 | 39.5 | **28.5 saved** |
+| SME cost | $10,200 | $5,925 | **$4,275 saved** |
+| Uncited answers | 34.0 | 19.8 | **14.3 fewer** |
+| Inconsistent pairs | 20.4 | 11.9 | **8.6 fewer** |
 
-At 10 questionnaires per month and the representative rate, a mid-size GTM team saves **~335 SME hours and ~$50,250** annually on answering alone.
+At 10 questionnaires per month and the representative rate, a mid-size GTM team saves **~375 SME hours and ~$56,250 per month** on answering alone.
 
 ### 3.4 Sensitivity
 
-If the true SME cost is $100/hour, annual savings are **~$33,500**. If it is $250/hour, savings are **~$83,750**. The model is parameter-driven; swap in measured values from the pilot.
+If the true SME cost is $100/hour, monthly savings are **~$37,500** and annual savings are **~$450,000**. If it is $250/hour, monthly savings are **~$93,750** and annual savings are **~$1,125,000**. The model is parameter-driven; swap in measured values from the pilot.
 
 ---
 
@@ -127,7 +127,7 @@ A single inconsistent or fabricated answer can:
 A&A's fail-closed design refuses to answer when evidence is missing, stale, or invisible to the requester. The permission invariant — *no answer text flows to a requester who cannot see all of its evidence* — is:
 
 - Property-tested over 200 runs,
-- Runtime-checked over all 127 eval cases (`scripts/verifyInvariantRuntime.ts`: 0 violations),
+- Runtime-checked over all 136 eval cases (`scripts/verifyInvariantRuntime.ts`: 0 violations),
 - Backed by a code-level Z3 contract proof (`scripts/verifyPipelineContracts.ts`: PROVED).
 
 This converts a latent compliance risk into a measurable, gated process.

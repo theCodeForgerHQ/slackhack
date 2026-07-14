@@ -51,11 +51,11 @@ TypeScript + Bolt. A small, sharp core:
 - **LedgerV2** — event-sourced, hash-chained approval lifecycle with live `verify`.
 - **xlsx export** — finished questionnaire with citations and approval records.
 
-The agent surface uses the agent_view Messages tab, a native Block Kit review table with per-row cards, an App Home dashboard (ACL-filtered per viewer), a Data Table of recent runs, a Canvas export artifact, a Workflow Builder custom step, and per-user OAuth scaffolding for private-channel RTS. The production HTTP receiver mounts both `/slack/events` and `/slack/actions` so block-kit interactions and modal submissions reach the app. 268 hermetic + live integration tests, CI, three Z3 proofs (including a code-level contract proof of the permission invariant), an offline smoke test of the whole loop, and a measured-impact harness.
+The agent surface uses the agent_view Messages tab, a native Block Kit review table with per-row cards, an App Home dashboard (ACL-filtered per viewer), a Data Table of recent runs, a Canvas export artifact, a Workflow Builder custom step, and per-user OAuth scaffolding for private-channel RTS. The production HTTP receiver mounts both `/slack/events` and `/slack/actions` so block-kit interactions and modal submissions reach the app. 284 hermetic + live integration tests, CI, three Z3 proofs (including a code-level contract proof of the permission invariant), an offline smoke test of the whole loop, and a measured-impact harness.
 
 ## Impact — quantified, with a path to real measurement
 
-Security questionnaires are a revenue tax: 50–300 rows per deal, mostly re-asking what the team already answered. A&A's fail-closed automation cuts the SME load by **67%** in measured smoke runs: **33.5 hours and $5,025 saved per 100 questions** versus the manual baseline documented in `docs/BASELINE-RULES.md`. The adversarial 127-case eval floor is **26.0 hours / $3,900 saved per 100 questions** with **100% guard correctness**.
+Security questionnaires are a revenue tax: 50–300 rows per deal, mostly re-asking what the team already answered. A&A's fail-closed automation cuts the SME load by **75%** in measured runs: **37.5 hours and $5,625 saved per 100 questions** versus the manual baseline documented in `docs/BASELINE-RULES.md`. The adversarial 136-case eval floor is **28.5 hours / $4,275 saved per 100 questions** with **100% guard correctness**.
 
 Documented pilot scenarios in `docs/CASE_STUDIES.md` show the product on realistic workflows: a 120-row SOC 2 renewal saving 40 SME hours, a fintech vendor review where A&A refused to fabricate an insurance answer, and an enterprise RFP where the stale-answer watcher caught 12 contradicted answers before they shipped.
 
@@ -65,27 +65,27 @@ The harder value is risk reduction. A&A refuses to answer when evidence is missi
 
 > **No answer text ever flows to a requester who cannot see all of its evidence.**
 
-Every "memory" agent caches answers and serves them back; almost none re-check *who is asking* against the evidence the answer was built from. We do, in three places (library reuse, fresh drafts, and the MCP server), all fail-closed, and we prove it with a 200-run property test, a runtime invariant check over all 127 eval cases, and a code-level Z3 contract proof that the concrete GroundingGate + ACL + stale-degradation contracts entail the invariant. This is the invariant a compliance tool must not get wrong.
+Every "memory" agent caches answers and serves them back; almost none re-check *who is asking* against the evidence the answer was built from. We do, in three places (library reuse, fresh drafts, and the MCP server), all fail-closed, and we prove it with a 200-run property test, a runtime invariant check over all 136 eval cases, and a code-level Z3 contract proof that the concrete GroundingGate + ACL + stale-degradation contracts entail the invariant. This is the invariant a compliance tool must not get wrong.
 
 ## Evals (measured, reproducible — `npx tsx evals/run.ts`)
 
-Against a seeded workspace with public/private channels and planted prompt-injection / stale-evidence / near-miss docs, over **127 labeled cases** (103 dev, 24 held-out):
+Against a seeded workspace with public/private channels and planted prompt-injection / stale-evidence / near-miss docs, over **136 labeled cases** (110 dev, 26 held-out):
 
 - Grounded recall: **100%** (visible evidence → cited answer)
 - Fail-closed correctness: **100%** (no visible evidence → never a grounded answer)
 - Injection resistance: **100%** (poison docs never produce a foreign-cited answer)
 - Citation faithfulness: **100%** (fabricated snippets caught by GroundingGate)
 - Stale-evidence detection: **100%** (contradicted approved answers degrade for re-review)
-- Guard-only metrics: **100%** (75/75 cases pass deterministically, independent of LLM)
+- Guard-only metrics: **100%** (79/79 cases pass deterministically, independent of LLM)
 
 ### Real-LLM validation (Azure OpenAI `gpt-54-mini`)
 
-- **127/127 cases pass (100%)**
+- **136/136 cases pass (100%)**
 - Dev set: **100%** across all categories
 - Held-out set: **100%** across all categories
-- Model-dependent metrics: **52/52 (100%)**
+- Model-dependent metrics: **57/57 (100%)**
 
-Unit + integration tests: **268/268 passed** (`npm test`).
+Unit + integration tests: **284/284 passed** (`npm test`).
 
 ## What we deliberately didn't build
 
