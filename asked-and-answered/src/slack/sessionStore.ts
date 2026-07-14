@@ -17,6 +17,8 @@ export interface SessionStore {
   load(runId: string): SessionRecord | undefined;
   delete(runId: string): void;
   prune(maxAgeMs: number): void;
+  /** Count results across all stored sessions that still need human review (needs_sme or grounded). */
+  countOpenReviews(): number;
 }
 
 /** In-memory store for tests and single-process deployments. */
@@ -40,6 +42,16 @@ export class InMemorySessionStore implements SessionStore {
     for (const [runId, record] of this.records) {
       if (new Date(record.updatedAt).getTime() < cutoff) this.records.delete(runId);
     }
+  }
+
+  countOpenReviews(): number {
+    let count = 0;
+    for (const record of this.records.values()) {
+      for (const r of record.results) {
+        if (r.state === 'needs_sme' || r.state === 'grounded') count++;
+      }
+    }
+    return count;
   }
 }
 
@@ -119,5 +131,17 @@ export class SqliteSessionStore implements SessionStore {
   prune(maxAgeMs: number): void {
     const cutoff = new Date(Date.now() - maxAgeMs).toISOString();
     this.db.prepare('DELETE FROM review_sessions WHERE updated_at < ?').run(cutoff);
+  }
+
+  countOpenReviews(): number {
+    const rows = this.db.prepare('SELECT results_json FROM review_sessions').all() as Array<{ results_json: string }>;
+    let count = 0;
+    for (const row of rows) {
+      const results = JSON.parse(row.results_json) as DraftResult[];
+      for (const r of results) {
+        if (r.state === 'needs_sme' || r.state === 'grounded') count++;
+      }
+    }
+    return count;
   }
 }

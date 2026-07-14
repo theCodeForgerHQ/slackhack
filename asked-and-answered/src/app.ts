@@ -459,7 +459,7 @@ app.event('app_home_opened', async ({ event, client }) => {
 
   if (tab === 'home') {
     const deps = depsForUser(userId);
-    const stats = await gatherHomeStats(library, ledgerV2, userId, deps.visibility);
+    const stats = await gatherHomeStats(library, ledgerV2, userId, deps.visibility, sessionStore.countOpenReviews());
     const invariant = await invariantHealthCheck();
     stats.invariantOk = invariant.status === 'pass';
     const homeOpts: { invariantCheckUrl?: string; useDataTable?: boolean } = { useDataTable: capabilities.dataTable };
@@ -1133,7 +1133,7 @@ app.action('apphome_return_home', async ({ ack, body, client }) => {
   const userId = (body as { user?: { id?: string } }).user?.id;
   if (!userId) return;
   const deps = depsForUser(userId);
-  const stats = await gatherHomeStats(library, ledgerV2, userId, deps.visibility);
+  const stats = await gatherHomeStats(library, ledgerV2, userId, deps.visibility, sessionStore.countOpenReviews());
   const invariant = await invariantHealthCheck();
   stats.invariantOk = invariant.status === 'pass';
   const homeOpts: { invariantCheckUrl?: string; useDataTable?: boolean } = { useDataTable: capabilities.dataTable };

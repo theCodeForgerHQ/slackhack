@@ -14,6 +14,9 @@ describe('gatherHomeStats', () => {
     expect(stats.smeTestimonyAnswers).toBe(0);
     expect(stats.ledgerEntries).toBe(0);
     expect(stats.ledgerOk).toBe(true);
+    expect(stats.autoAnswerRate).toBe(0);
+    expect(stats.pendingSMEReviews).toBe(0);
+    expect(stats.staleAnswers).toBe(0);
     expect(stats.recentAnswers).toHaveLength(0);
     expect(stats.recentRuns).toHaveLength(0);
   });
@@ -45,6 +48,9 @@ describe('gatherHomeStats', () => {
     expect(stats.smeTestimonyAnswers).toBe(1);
     expect(stats.questionnairesRun).toBe(2);
     expect(stats.ledgerEntries).toBe(2);
+    expect(stats.autoAnswerRate).toBe(50);
+    expect(stats.pendingSMEReviews).toBe(0);
+    expect(stats.staleAnswers).toBe(0);
     expect(stats.recentAnswers).toHaveLength(2);
     expect(stats.recentRuns).toHaveLength(2);
     expect(stats.recentRuns[0]?.questions).toBe(0);
@@ -100,6 +106,9 @@ describe('appHomeBlocks', () => {
       ledgerEntries: 12,
       ledgerOk: true,
       invariantOk: true,
+      autoAnswerRate: 75,
+      pendingSMEReviews: 2,
+      staleAnswers: 0,
       recentRuns: [
         { runId: 'run-abc-123', when: '2026-07-11T10:00:00.000Z', questions: 12 },
       ],
@@ -135,6 +144,9 @@ describe('appHomeBlocks', () => {
         ledgerEntries: 0,
         ledgerOk: true,
         invariantOk: true,
+        autoAnswerRate: 0,
+        pendingSMEReviews: 0,
+        staleAnswers: 0,
         recentRuns: [],
         recentAnswers: [],
       },

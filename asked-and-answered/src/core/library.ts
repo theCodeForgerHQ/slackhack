@@ -279,6 +279,12 @@ export class AnswerLibrary {
     }
   }
 
+  /** How many approved answers currently have stale or contradicted evidence. */
+  staleAnswerCount(): number {
+    if (!this.graph) return 0;
+    return this.allAnswers().filter((a) => this.graph!.isStale(a.id)).length;
+  }
+
   allAnswers(): ApprovedAnswer[] {
     const rows = this.db.prepare('SELECT * FROM answers').all() as Array<{
       id: number;

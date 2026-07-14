@@ -18,6 +18,12 @@ export interface HomeDashboardStats {
   ledgerEntries: number;
   ledgerOk: boolean;
   invariantOk: boolean;
+  /** Percentage of approved answers that are evidence-backed (0–100). */
+  autoAnswerRate: number;
+  /** Questions across all active review sessions that still need a human. */
+  pendingSMEReviews: number;
+  /** Approved answers whose evidence is now flagged stale/contradicted. */
+  staleAnswers: number;
   recentAnswers: Array<{
     questionText: string;
     answerText: string;
@@ -37,6 +43,7 @@ export async function gatherHomeStats(
   ledgerV2: LedgerV2,
   userId?: string,
   visibility?: { canSee(userId: string, citation: { channelId: string }): Promise<boolean> },
+  pendingSMEReviews = 0,
 ): Promise<HomeDashboardStats> {
   const all = library.allAnswers();
   const verified = all.filter((a) => a.kind === 'evidence');
@@ -44,6 +51,9 @@ export async function gatherHomeStats(
   const v2rows = ledgerV2.rows();
   const questionnairesRun = v2rows.filter((r) => r.action === 'QuestionnaireIntaken').length;
   const ledgerOk = ledgerV2.verify().ok;
+  const totalApproved = all.length;
+  const autoAnswerRate = totalApproved > 0 ? Math.round((verified.length / totalApproved) * 100) : 0;
+  const staleAnswers = library.staleAnswerCount();
 
   const recentRuns = v2rows
     .filter((r) => r.action === 'QuestionnaireIntaken')
@@ -96,6 +106,9 @@ export async function gatherHomeStats(
     ledgerEntries: v2rows.length,
     ledgerOk,
     invariantOk: true, // caller overwrites after running invariantHealthCheck
+    autoAnswerRate,
+    pendingSMEReviews,
+    staleAnswers,
     recentAnswers: recentAnswers.reverse(),
     recentRuns,
   };
@@ -130,6 +143,17 @@ export function appHomeBlocks(
           `• Verified answers in library: *${stats.verifiedAnswers}*\n` +
           `• Expert-typed answers: *${stats.smeTestimonyAnswers}*\n` +
           `• Ledger entries: *${stats.ledgerEntries}*`,
+      },
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text:
+          `*Performance & backlog*\n` +
+          `• Auto-answer rate: *${stats.autoAnswerRate}%*\n` +
+          `• Pending human reviews: *${stats.pendingSMEReviews}*\n` +
+          `• Stale approved answers: *${stats.staleAnswers}*`,
       },
     },
     {

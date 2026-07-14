@@ -76,6 +76,31 @@ function testStore(name: string, create: () => InMemorySessionStore | SqliteSess
       expect(store.load('old')).toBeUndefined();
       expect(store.load('recent')).toBeDefined();
     });
+
+    it('counts open reviews across sessions', () => {
+      const store = create();
+      store.save({
+        runId: 'run-1',
+        requesterId: 'U1',
+        results: [
+          { questionId: 'q1', questionText: 'A', state: 'grounded', answerText: 'a', citations: [] },
+          { questionId: 'q2', questionText: 'B', state: 'verified', answerText: 'b', citations: [] },
+          { questionId: 'q3', questionText: 'C', state: 'needs_sme' },
+        ] as DraftResult[],
+        counts: { total: 3, deduped: 3, verified: 1, grounded: 1, needsSme: 1 },
+        confirmedQuestionIds: [],
+        updatedAt: new Date().toISOString(),
+      });
+      store.save({
+        runId: 'run-2',
+        requesterId: 'U2',
+        results: [{ questionId: 'q4', questionText: 'D', state: 'grounded', answerText: 'd', citations: [] }] as DraftResult[],
+        counts: { total: 1, deduped: 1, verified: 0, grounded: 1, needsSme: 0 },
+        confirmedQuestionIds: [],
+        updatedAt: new Date().toISOString(),
+      });
+      expect(store.countOpenReviews()).toBe(3);
+    });
   });
 }
 
