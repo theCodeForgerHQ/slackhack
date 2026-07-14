@@ -60,6 +60,76 @@ export function parseRtsResponse(raw: unknown): RtsHit[] {
   return hits;
 }
 
+/** Fall back to public-channel history when RTS assistant.search.context fails.
+ *  This keeps the demo working in DMs or sandboxes where action tokens are not
+ *  issued, while preserving the real RTS path wherever it is available.
+ */
+async function historyFallback(
+  apiCall: SlackApiCall,
+  query: string,
+  limit: number,
+): Promise<RtsHit[]> {
+  const queryTerms = new Set(
+    query
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length > 2),
+  );
+  if (queryTerms.size === 0) return [];
+
+  try {
+    const list = (await apiCall('conversations.list', {
+      types: 'public_channel',
+      exclude_archived: true,
+      limit: 100,
+    })) as { channels?: Array<{ id: string; name?: string; is_member?: boolean }> };
+    const hits: RtsHit[] = [];
+    const channels = (list.channels ?? []).filter((ch) => ch.is_member);
+    for (const channel of channels.slice(0, 5)) {
+      try {
+        const history = (await apiCall('conversations.history', {
+          channel: channel.id,
+          limit: 100,
+        })) as { messages?: Array<{ text?: string; ts?: string; user?: string }> };
+        const messages = history.messages ?? [];
+        for (const msg of messages) {
+          const text = msg.text ?? '';
+          const textTerms = new Set(
+            text
+              .toLowerCase()
+              .replace(/[^a-z0-9\s]/g, ' ')
+              .split(/\s+/)
+              .filter((w) => w.length > 2),
+          );
+          let overlap = 0;
+          for (const t of queryTerms) if (textTerms.has(t)) overlap++;
+          if (overlap === 0) continue;
+          // Resolve a real permalink so exports and reviewers can open the citation.
+          let permalink = '';
+          try {
+            const permalinkRes = (await apiCall('chat.getPermalink', {
+              channel: channel.id,
+              message_ts: msg.ts,
+            })) as { permalink?: string };
+            permalink = permalinkRes.permalink ?? '';
+          } catch {
+            permalink = '';
+          }
+          if (!permalink) continue;
+          hits.push({ permalink, channelId: channel.id, ts: msg.ts ?? '', snippet: text });
+          if (hits.length >= limit) return hits;
+        }
+      } catch {
+        // Ignore per-channel errors; keep scanning other channels.
+      }
+    }
+    return hits;
+  } catch {
+    return [];
+  }
+}
+
 /** Production RtsClient bound to one requesting user (permission scoping). */
 export class SlackRtsClient implements RtsClient {
   constructor(
@@ -81,7 +151,17 @@ export class SlackRtsClient implements RtsClient {
     if (token) args.action_token = token;
     if (this.userToken) args.token = this.userToken;
 
-    const raw = await this.apiCall('assistant.search.context', args);
-    return { hits: parseRtsResponse(raw) };
+    try {
+      const raw = await this.apiCall('assistant.search.context', args);
+      const hits = parseRtsResponse(raw);
+      if (hits.length > 0) return { hits };
+      // Empty RTS result: try fallback once before giving up.
+      const fallback = await historyFallback(this.apiCall, params.query, params.limit ?? 15);
+      return { hits: fallback };
+    } catch {
+      // RTS failed (likely missing action token). Fall back to public-channel history.
+      const fallback = await historyFallback(this.apiCall, params.query, params.limit ?? 15);
+      return { hits: fallback };
+    }
   }
 }
