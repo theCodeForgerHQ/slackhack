@@ -88,6 +88,7 @@ function required(name: string): string {
 required('AA_LEDGER_KEY');
 
 const dbPath = process.env.AA_DB_PATH ?? 'asked-and-answered.db';
+const publicUrl = process.env.AA_PUBLIC_URL ?? '';
 
 const installationStore: InstallationStore =
   process.env.AA_SESSION_STORE === 'memory'
@@ -342,6 +343,11 @@ const app = new App({
       path: '/case-studies/internal-audit.html',
       method: ['GET'],
       handler: (_req, res) => servePublicFile(res, 'public/case-studies/internal-audit.html'),
+    },
+    {
+      path: '/safety-report',
+      method: ['GET'],
+      handler: (_req, res) => servePublicFile(res, 'public/safety-report.html'),
     },
   ],
 });
@@ -711,7 +717,7 @@ app.action('open_run_card', async ({ ack, body, client, action }) => {
       channel: t.channel,
       thread_ts: t.thread,
       text: `Agent Run Card — ${result.questionText}`,
-      blocks: agentRunCardBlocks(result, resolved.session.runId, signatures) as never,
+      blocks: agentRunCardBlocks(result, resolved.session.runId, signatures, publicUrl) as never,
     });
   } catch (err) {
     console.error('open_run_card failed', err);

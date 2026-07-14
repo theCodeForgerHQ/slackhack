@@ -330,6 +330,7 @@ export function agentRunCardBlocks(
   result: DraftResult,
   runId = '',
   signatures: RunSignatures = { timestamp: new Date().toISOString() },
+  publicUrl = '',
 ): Block[] {
   const signature = runSignatureHash(runId, result, signatures);
   const blocks: Block[] = [
@@ -375,6 +376,18 @@ export function agentRunCardBlocks(
     type: 'context',
     elements: [{ type: 'mrkdwn', text: `:lock: ${footerParts.join(' · ')}` }],
   });
+
+  if (publicUrl) {
+    blocks.push({
+      type: 'context',
+      elements: [
+        {
+          type: 'mrkdwn',
+          text: `:shield: <${publicUrl}/verify-ledger|Verify ledger> · <${publicUrl}/safety-report|Safety report>`,
+        },
+      ],
+    });
+  }
 
   return blocks;
 }

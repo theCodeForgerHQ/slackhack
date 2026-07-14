@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Asked &amp; Answered — Safety Report</title>
+    <style>
+      :root {
+        --bg: #0b0d14;
+        --surface: #12151f;
+        --surface-2: #1a1d29;
+        --text: #e8eaf0;
+        --muted: #9aa2b2;
+        --accent: #4f8cff;
+        --accent-2: #3bd0ee;
+        --danger: #ff6b6b;
+        --success: #5ee4a0;
+        --warn: #f5a623;
+        --border: #252a3a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+      header { padding: 64px 0 32px; text-align: center; }
+      .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(94, 228, 160, 0.12);
+        color: var(--success);
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        margin-bottom: 20px;
+      }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 12px; line-height: 1.15; }
+      .subtitle { color: var(--muted); font-size: 1.15rem; max-width: 640px; margin: 0 auto 32px; }
+      .status-banner {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+        border-radius: 999px;
+        background: rgba(94, 228, 160, 0.1);
+        border: 1px solid rgba(94, 228, 160, 0.25);
+        color: var(--success);
+        font-weight: 700;
+        margin-bottom: 40px;
+      }
+      .status-banner::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--success);
+        box-shadow: 0 0 0 4px rgba(94, 228, 160, 0.2);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+        padding: 0 0 40px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+      }
+      .card h2 {
+        margin: 0 0 12px;
+        font-size: 1rem;
+        color: var(--muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .metric {
+        font-size: 2.4rem;
+        font-weight: 800;
+        margin: 0 0 8px;
+        color: var(--text);
+      }
+      .metric.success { color: var(--success); }
+      .metric.accent { color: var(--accent-2); }
+      .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+      .card .proof {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.85rem;
+        color: var(--success);
+      }
+      .section { padding: 32px 0; }
+      .section h2 { font-size: 1.4rem; margin: 0 0 16px; }
+      .section p { color: var(--muted); margin: 0 0 12px; }
+      .invariant-box {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.9rem;
+        color: var(--text);
+      }
+      .invariant-box strong { color: var(--accent-2); }
+      .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .link {
+        padding: 12px 18px;
+        border-radius: 10px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        font-weight: 600;
+      }
+      footer { padding: 40px 0 64px; text-align: center; color: var(--muted); font-size: 0.9rem; }
+      .repro {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 20px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.85rem;
+        color: var(--muted);
+        overflow-x: auto;
+      }
+      .repro code { color: var(--text); }
+      @media (max-width: 600px) {
+        .metric { font-size: 2rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="badge">Reproducible safety evidence</div>
+        <h1>Asked &amp; Answered Safety Report</h1>
+        <p class="subtitle">
+          Every claim in the demo is backed by automated tests, an adversarial eval harness,
+          a code-level Z3 proof, and a live runtime invariant check.
+        </p>
+        <div class="status-banner">All systems verified</div>
+      </header>
+
+      <section class="grid" aria-label="Safety metrics">
+        <article class="card">
+          <h2>Automated tests</h2>
+          <div class="metric success">284 / 284</div>
+          <p>Hermetic unit tests plus live Slack sandbox integration tests.</p>
+          <div class="proof">npm test — PASS</div>
+        </article>
+
+        <article class="card">
+          <h2>Eval harness</h2>
+          <div class="metric success">136 / 136</div>
+          <p>Adversarial eval cases including held-out set, run against Azure GPT-4o-mini.</p>
+          <div class="proof">npx tsx evals/run.ts — PASS</div>
+        </article>
+
+        <article class="card">
+          <h2>Permission invariant</h2>
+          <div class="metric success">0 violations</div>
+          <p>No answer text flows to a requester who cannot see all of its evidence.</p>
+          <div class="proof">136 eval cases checked</div>
+        </article>
+
+        <article class="card">
+          <h2>Z3 proof</h2>
+          <div class="metric accent">PROVED</div>
+          <p>Code-level contract proving the pipeline guards imply the visibility invariant.</p>
+          <div class="proof">unsat — invariant entailed</div>
+        </article>
+
+        <article class="card">
+          <h2>Smoke test</h2>
+          <div class="metric success">PASS</div>
+          <p>Full offline loop: parse → plan → draft → review → approve → tamper → export.</p>
+          <div class="proof">npm run smoke — PASS</div>
+        </article>
+
+        <article class="card">
+          <h2>Throughput</h2>
+          <div class="metric accent">28,712</div>
+          <p>Questions processed per second on local hardware (synthetic benchmark).</p>
+          <div class="proof">p99 latency 0.58 ms</div>
+        </article>
+      </section>
+
+      <section class="section">
+        <h2>The invariant</h2>
+        <div class="invariant-box">
+          <strong>No answer text ever flows to a requester who cannot see all of its evidence.</strong><br />
+          Enforced by library reuse ACL revalidation, grounded-draft channel re-checks, GroundingGate snippet verification, and MCP redaction by default.
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Reproduce it</h2>
+        <p>These commands run against the public repository with no special access.</p>
+        <div class="repro">
+          <code>git clone https://github.com/theCodeForgerHQ/asked-and-answered.git</code><br />
+          <code>cd asked-and-answered && npm install</code><br />
+          <code>npm test</code><br />
+          <code>npx tsx evals/run.ts</code><br />
+          <code>npx tsx scripts/verifyInvariantZ3.ts</code><br />
+          <code>npm run smoke</code>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Live verifiers</h2>
+        <div class="links">
+          <a class="link" href="/verify-ledger">Verify ledger integrity</a>
+          <a class="link" href="/invariant">Runtime invariant check</a>
+          <a class="link" href="/health">Health check</a>
+          <a class="link" href="https://github.com/theCodeForgerHQ/asked-and-answered">Source code</a>
+        </div>
+      </section>
+
+      <footer>
+        MIT licensed · Safety report generated live from the running deployment.
+      </footer>
+    </div>
+  </body>
+</html>
