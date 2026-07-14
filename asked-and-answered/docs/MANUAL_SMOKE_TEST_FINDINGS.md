@@ -24,6 +24,7 @@ Tested against `https://asked-and-answered-app.onrender.com` after the fixes in 
 | `GET /health` | 200 | Plain-text `ok` |
 | `GET /health` (Accept JSON) | 200 | `{"status":"ok","capabilities":{...}}` |
 | `GET /invariant` | 200 | `{"status":"pass","casesRun":50}` |
+| `GET /verify-ledger` | 200 | Ledger + both Z3 proofs verified |
 | `GET /docs/SUBMISSION.md` | 200 | Markdown served |
 | `GET /docs/IMPACT.md` | 200 | Markdown served |
 | `GET /docs/EVALS.md` | 200 | Markdown served |
@@ -67,17 +68,47 @@ This verified that the conformal matcher fix eliminated the false-positive cross
 
 ### 1.6 Core component scripts
 - `npm run smoke` — PASS
-- `npx tsx evals/run.ts` (deterministic) — 127/127 PASS
-- `npx tsx evals/run.ts` with `AA_EVAL_LLM=azure` — 127/127 PASS (after self-grounding retry)
+- `npx tsx evals/run.ts` (deterministic) — 136/136 PASS
+- `npx tsx evals/run.ts` with `AA_EVAL_LLM=azure` — 136/136 PASS (after self-grounding retry)
 - `npx tsx scripts/verifyInvariantZ3.ts` — PROVED
 - `npx tsx scripts/verifyPipelineCodeLevel.ts` — PROVED
+- `npx tsx scripts/verifyPipelineContracts.ts` — PROVED
+- `npx tsx scripts/verifyInvariantRuntime.ts` — 136 cases, 0 violations
 - `npx tsx scripts/measureImpact.ts` — generated ROI numbers
 - `npx tsx scripts/testAzure.ts` — Azure OpenAI drafter works
 - MCP server over stdio — initialize, tools/list, search_answers all respond correctly
 
 ### 1.7 Full automated test suite
 - `npm run typecheck` — clean
-- `npm test` — 268/268 passed
+- `npm test` — 281/281 passed
+
+---
+
+## 1.8 New capabilities added in this pass
+
+### KPI App Home dashboard
+- Added `autoAnswerRate`, `pendingSMEReviews`, and `staleAnswers` to App Home.
+- Verified by `tests/appHome.test.ts` and rendered live when App Home is enabled.
+
+### Adversarial eval expansion
+- Expanded dataset from 127 to 136 cases, including delimiter-break, HTML entity, markdown fence, obfuscated tag, comment, continuation, leetspeak, and emoji injection patterns.
+- Hardened `src/core/sanitize.ts` to escape both opening and closing evidence delimiter tags.
+- Verified: 136/136 eval cases pass; 79/79 guard-only cases pass.
+
+### Public `/verify-ledger` safety proof
+- Added `/verify-ledger` endpoint that re-runs legacy ledger, event-sourced ledger, runtime invariant, abstract Z3 proof, and code-level Z3 proof.
+- Added "See the safety proof" URL button to App Home.
+- Verified via curl against live Render app: all checks return `ok`/`proved`.
+
+### N-of-M approval policy
+- Added `src/core/policy.ts` that selects `HIGH_SENSITIVITY_POLICY` (2 distinct approvers) for questions matching sensitive terms.
+- Extended `decide.ts` and `ReviewSession` to support multiple distinct approvers.
+- Verified by `tests/decide.test.ts`, `tests/policy.test.ts`, and `tests/flows.test.ts`.
+
+### Canvas-first decision log
+- `buildCanvasDocument` now supports `decisionLog: true`, surfacing approved answers in a dedicated section with approver signatures.
+- Both auto-export and manual Canvas export use decision-log branding.
+- Verified by `tests/canvasExport.test.ts`.
 
 ---
 
@@ -168,10 +199,10 @@ The Azure App Service `asked-and-answered-app` in `rg-asked-and-answered` does n
 | Synthetic Slack events/actions against Render | PASS |
 | End-to-end compounding, no false positives | PASS |
 | `npm run typecheck` | PASS |
-| `npm test` (268) | PASS |
+| `npm test` (281) | PASS |
 | `npm run smoke` | PASS |
-| Deterministic eval 127/127 | PASS |
-| Azure real-LLM eval 127/127 | PASS |
+| Deterministic eval 136/136 | PASS |
+| Azure real-LLM eval 136/136 | PASS |
 | Z3 invariant + code-level proofs | PASS |
 | MCP server stdio | PASS |
 | Render production deploy | PASS |
@@ -180,6 +211,14 @@ The Azure App Service `asked-and-answered-app` in `rg-asked-and-answered` does n
 
 ## 5. Commits pushed
 
+- `801f597` — Fix N-of-M approval for legacy/test path without ledgerV2
+- `b7492ff` — Add Canvas-first decision log with approved-answer section and signatures
+- `2826568` — Add N-of-M approval policy engine for high-sensitivity questions
+- `e0898ea` — Add public `/verify-ledger` endpoint and See the safety proof button
+- `9521bcd` — Expand adversarial eval to 136 cases and harden `sanitize.ts` vs delimiter breaks
+- `bf0ac8d` — Add KPI dashboard: auto-answer rate, pending reviews, stale answers
+- `e748bdd` — Add competitor swarm findings: 71 repos, 25 substantive, absorption plan
+- `9575203` — Update manual smoke test findings with live Render end-to-end results
 - `804fa30` — Add manual smoke test findings and fixes doc
 - `4b1eafb` — Manual smoke-test fixes: `/slack/actions` endpoint, conformal matcher safety cap, self-grounding LLM retry, modal persistence
 - `9d935e1` — Fix Render build: add native build tools for better-sqlite3
