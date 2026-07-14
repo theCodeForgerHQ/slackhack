@@ -39,10 +39,13 @@ export function buildCanvasDocument(
     requesterId: string;
     title?: string;
     generatedAt?: string;
+    decisionLog?: boolean;
   },
 ): CanvasDocument {
+  const title = opts.title ?? (opts.decisionLog ? 'Decision Log — Asked & Answered' : 'Questionnaire — Asked & Answered');
+  const approved = results.filter((r) => r.state === 'verified' && r.approvedBy);
   const sections: CanvasSection[] = [
-    { type: 'header', text: opts.title ?? 'Questionnaire — Asked & Answered' },
+    { type: 'header', text: title },
     {
       type: 'paragraph',
       text:
@@ -61,6 +64,18 @@ export function buildCanvasDocument(
       ],
     },
   ];
+
+  if (approved.length > 0) {
+    sections.push({ type: 'header', text: 'Decision log — approved answers' });
+    sections.push({
+      type: 'bullets',
+      items: approved.map(
+        (r) =>
+          `**${r.questionText}** — ${r.answerText ?? ''} ` +
+          `(approved by <@${r.approvedBy}> at ${r.approvedAt ?? ''})`,
+      ),
+    });
+  }
 
   for (const [i, r] of results.entries()) {
     sections.push({ type: 'header', text: `${i + 1}. ${r.questionText}` });
@@ -96,7 +111,7 @@ export function buildCanvasDocument(
       'This invariant is property-tested, live-checked at /invariant, and machine-verified with Z3.',
   });
 
-  return { title: opts.title ?? 'Questionnaire — Asked & Answered', sections };
+  return { title, sections };
 }
 
 /** Convert a Canvas document to Markdown for file-upload fallback. */

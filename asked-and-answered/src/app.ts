@@ -636,7 +636,8 @@ app.message(async ({ message, client }) => {
         const doc = buildCanvasDocument(session.results, {
           runId: session.runId,
           requesterId: msg.user,
-          title: 'Questionnaire — Asked & Answered',
+          title: 'Decision Log — Asked & Answered',
+          decisionLog: true,
         });
         const channel = (msg as { channel?: string }).channel ?? '';
         const thread = (msg as { ts?: string }).ts ?? '';
@@ -979,7 +980,8 @@ app.action('export_canvas', async ({ ack, body, client, action }) => {
     const doc = buildCanvasDocument(resolved.session.results, {
       runId: resolved.session.runId,
       requesterId: resolved.session.requesterId,
-      title: 'Questionnaire — Asked & Answered',
+      title: 'Decision Log — Asked & Answered',
+      decisionLog: true,
     });
     const result = await createCanvasOrFallback(client, t.channel, t.thread, doc, {
       forceFallback: !capabilities.canvas,

@@ -54,6 +54,17 @@ describe('buildCanvasDocument', () => {
     const paragraph = doc.sections[q2Index + 2];
     expect(paragraph?.text).toMatch(/routed to a human|No sufficient workspace evidence/);
   });
+
+  test('decision log mode surfaces approved answers in a dedicated section', () => {
+    const doc = buildCanvasDocument(MIXED, { runId: 'run-abc', requesterId: 'U_REQ', decisionLog: true });
+    expect(doc.title).toBe('Decision Log — Asked & Answered');
+    const headers = doc.sections.filter((s) => s.type === 'header').map((s) => s.text);
+    expect(headers).toContain('Decision log — approved answers');
+    const log = doc.sections.find((s) => s.text === 'Decision log — approved answers');
+    const bullets = doc.sections[doc.sections.indexOf(log!) + 1];
+    expect(bullets?.items?.[0]).toContain('U_SME');
+    expect(bullets?.items?.[0]).toContain('approved by');
+  });
 });
 
 describe('canvasToMarkdown', () => {
