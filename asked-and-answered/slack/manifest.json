@@ -86,7 +86,11 @@
         "file_shared"
       ]
     },
-    "interactivity": { "is_enabled": true },
+    "interactivity": {
+      "is_enabled": true,
+      "request_url": "https://asked-and-answered-app.onrender.com/slack/actions",
+      "message_menu_options_url": "https://asked-and-answered-app.onrender.com/slack/actions"
+    },
     "org_deploy_enabled": false,
     "socket_mode_enabled": false,
     "token_rotation_enabled": false
