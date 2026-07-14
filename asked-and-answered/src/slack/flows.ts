@@ -31,6 +31,8 @@ export class ReviewSession {
 
   /** Question IDs that have passed the first mandatory human gate. */
   public readonly confirmedQuestionIds = new Set<string>();
+  /** Tracks which human confirmed each question (legacy path distinct-actor gate). */
+  public readonly confirmedBy = new Map<string, string>();
 
   constructor(
     public readonly results: DraftResult[],
@@ -41,12 +43,13 @@ export class ReviewSession {
 
   /** Reconstruct a session from durable state + fresh per-request deps. */
   static fromState(
-    state: { runId: string; results: DraftResult[]; counts: PlanCounts; requesterId: string; confirmedQuestionIds?: string[] },
+    state: { runId: string; results: DraftResult[]; counts: PlanCounts; requesterId: string; confirmedQuestionIds?: string[]; confirmedBy?: Record<string, string> },
     deps: RunDeps,
   ): ReviewSession {
     const session = new ReviewSession(state.results, state.counts, deps, state.requesterId);
     (session as unknown as { runId: string }).runId = state.runId;
     for (const id of state.confirmedQuestionIds ?? []) session.confirmedQuestionIds.add(id);
+    for (const [id, actor] of Object.entries(state.confirmedBy ?? {})) session.confirmedBy.set(id, actor);
     return session;
   }
 
@@ -93,6 +96,7 @@ export class ReviewSession {
     if (decision.ok) this.emitEvents(decision.events ?? []);
 
     this.confirmedQuestionIds.add(questionId);
+    this.confirmedBy.set(questionId, actor);
     return r;
   }
 
@@ -118,18 +122,30 @@ export class ReviewSession {
       answerHashInput: r.answerText,
       evidenceRefs: (r.citations ?? []).map((c) => c.permalink),
     });
-    const decision = decide(this.deps.ledgerV2?.entries() ?? [], {
-      type: 'Approve',
-      questionId,
-      actor,
-      actorType: 'human',
-      result: r,
-      policy,
-    });
-    if (decision.ok) this.emitEvents(decision.events ?? []);
+
+    // When an event-sourced ledger is present, use the pure decide() engine and
+    // enforce N-of-M approval through domain events. In legacy/test setups
+    // without ledgerV2, fall back to the session-level confirmed + distinct-actor
+    // gate so existing tests and smoke scripts keep working.
+    const ledgerV2 = this.deps.ledgerV2;
+    let finalApproval = false;
+    if (ledgerV2) {
+      const decision = decide(ledgerV2.entries(), {
+        type: 'Approve',
+        questionId,
+        actor,
+        actorType: 'human',
+        result: r,
+        policy,
+      });
+      if (decision.ok) this.emitEvents(decision.events ?? []);
+      finalApproval = decision.ok && (decision.finalApproval ?? false);
+    } else {
+      finalApproval = this.confirmedQuestionIds.has(questionId) && this.confirmedBy.get(questionId) !== actor;
+    }
 
     // N-of-M policy: only mark verified when enough distinct approvers have approved.
-    if (decision.ok && decision.finalApproval) {
+    if (finalApproval) {
       const citations = r.citations ?? [];
       const saved = this.deps.library.saveApproved({
         questionText: r.questionText,

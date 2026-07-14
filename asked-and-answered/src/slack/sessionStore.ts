@@ -9,6 +9,8 @@ export interface SessionRecord {
   counts: PlanCounts;
   /** Question IDs that have passed the first mandatory human gate. */
   confirmedQuestionIds?: string[];
+  /** Maps confirmed question ID to the human who confirmed it (legacy distinct-actor gate). */
+  confirmedBy?: Record<string, string>;
   updatedAt: string;
 }
 
@@ -69,12 +71,14 @@ export class SqliteSessionStore implements SessionStore {
            results_json TEXT NOT NULL,
            counts_json TEXT NOT NULL,
            confirmed_json TEXT NOT NULL DEFAULT '[]',
+           confirmed_by_json TEXT NOT NULL DEFAULT '{}',
            updated_at TEXT NOT NULL
          )`,
       )
       .run();
-    // Backfill existing rows so the column is always present.
+    // Backfill existing rows so the columns are always present.
     this.db.prepare(`UPDATE review_sessions SET confirmed_json = '[]' WHERE confirmed_json IS NULL`).run();
+    this.db.prepare(`UPDATE review_sessions SET confirmed_by_json = '{}' WHERE confirmed_by_json IS NULL`).run();
   }
 
   static inMemory(): SqliteSessionStore {
@@ -88,13 +92,14 @@ export class SqliteSessionStore implements SessionStore {
   save(record: SessionRecord): void {
     this.db
       .prepare(
-        `INSERT INTO review_sessions (run_id, requester_id, results_json, counts_json, confirmed_json, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?)
+        `INSERT INTO review_sessions (run_id, requester_id, results_json, counts_json, confirmed_json, confirmed_by_json, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(run_id) DO UPDATE SET
            requester_id = excluded.requester_id,
            results_json = excluded.results_json,
            counts_json = excluded.counts_json,
            confirmed_json = excluded.confirmed_json,
+           confirmed_by_json = excluded.confirmed_by_json,
            updated_at = excluded.updated_at`,
       )
       .run(
@@ -103,6 +108,7 @@ export class SqliteSessionStore implements SessionStore {
         JSON.stringify(record.results),
         JSON.stringify(record.counts),
         JSON.stringify(record.confirmedQuestionIds ?? []),
+        JSON.stringify(record.confirmedBy ?? {}),
         record.updatedAt,
       );
   }
@@ -111,7 +117,7 @@ export class SqliteSessionStore implements SessionStore {
     const row = this.db
       .prepare('SELECT * FROM review_sessions WHERE run_id = ?')
       .get(runId) as
-      | { run_id: string; requester_id: string; results_json: string; counts_json: string; confirmed_json: string; updated_at: string }
+      | { run_id: string; requester_id: string; results_json: string; counts_json: string; confirmed_json: string; confirmed_by_json: string; updated_at: string }
       | undefined;
     if (!row) return undefined;
     return {
@@ -120,6 +126,7 @@ export class SqliteSessionStore implements SessionStore {
       results: JSON.parse(row.results_json) as DraftResult[],
       counts: JSON.parse(row.counts_json) as PlanCounts,
       confirmedQuestionIds: JSON.parse(row.confirmed_json) as string[],
+      confirmedBy: JSON.parse(row.confirmed_by_json) as Record<string, string>,
       updatedAt: row.updated_at,
     };
   }

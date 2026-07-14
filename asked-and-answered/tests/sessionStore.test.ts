@@ -31,6 +31,7 @@ function testStore(name: string, create: () => InMemorySessionStore | SqliteSess
         results: sampleResults,
         counts: sampleCounts,
         confirmedQuestionIds: ['q1'],
+        confirmedBy: { q1: 'U_SME' },
         updatedAt: new Date().toISOString(),
       };
       store.save(record);
@@ -45,13 +46,14 @@ function testStore(name: string, create: () => InMemorySessionStore | SqliteSess
 
     it('updates an existing session', () => {
       const store = create();
-      store.save({ runId: 'run-1', requesterId: 'U1', results: sampleResults, counts: sampleCounts, confirmedQuestionIds: [], updatedAt: new Date().toISOString() });
+      store.save({ runId: 'run-1', requesterId: 'U1', results: sampleResults, counts: sampleCounts, confirmedQuestionIds: [], confirmedBy: {}, updatedAt: new Date().toISOString() });
       const updated = {
         runId: 'run-1',
         requesterId: 'U1',
         results: [],
         counts: { total: 0, deduped: 0, verified: 0, grounded: 0, needsSme: 0 },
         confirmedQuestionIds: [],
+        confirmedBy: {},
         updatedAt: new Date().toISOString(),
       };
       store.save(updated);
@@ -60,7 +62,7 @@ function testStore(name: string, create: () => InMemorySessionStore | SqliteSess
 
     it('deletes a session', () => {
       const store = create();
-      const record = { runId: 'run-1', requesterId: 'U1', results: sampleResults, counts: sampleCounts, confirmedQuestionIds: [], updatedAt: new Date().toISOString() };
+      const record = { runId: 'run-1', requesterId: 'U1', results: sampleResults, counts: sampleCounts, confirmedQuestionIds: [], confirmedBy: {}, updatedAt: new Date().toISOString() };
       store.save(record);
       store.delete('run-1');
       expect(store.load('run-1')).toBeUndefined();
@@ -70,8 +72,8 @@ function testStore(name: string, create: () => InMemorySessionStore | SqliteSess
       const store = create();
       const old = new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString();
       const recent = new Date().toISOString();
-      store.save({ runId: 'old', requesterId: 'U1', results: sampleResults, counts: sampleCounts, confirmedQuestionIds: [], updatedAt: old });
-      store.save({ runId: 'recent', requesterId: 'U1', results: sampleResults, counts: sampleCounts, confirmedQuestionIds: [], updatedAt: recent });
+      store.save({ runId: 'old', requesterId: 'U1', results: sampleResults, counts: sampleCounts, confirmedQuestionIds: [], confirmedBy: {}, updatedAt: old });
+      store.save({ runId: 'recent', requesterId: 'U1', results: sampleResults, counts: sampleCounts, confirmedQuestionIds: [], confirmedBy: {}, updatedAt: recent });
       store.prune(6 * 60 * 60 * 1000);
       expect(store.load('old')).toBeUndefined();
       expect(store.load('recent')).toBeDefined();
@@ -89,6 +91,7 @@ function testStore(name: string, create: () => InMemorySessionStore | SqliteSess
         ] as DraftResult[],
         counts: { total: 3, deduped: 3, verified: 1, grounded: 1, needsSme: 1 },
         confirmedQuestionIds: [],
+        confirmedBy: {},
         updatedAt: new Date().toISOString(),
       });
       store.save({
@@ -97,6 +100,7 @@ function testStore(name: string, create: () => InMemorySessionStore | SqliteSess
         results: [{ questionId: 'q4', questionText: 'D', state: 'grounded', answerText: 'd', citations: [] }] as DraftResult[],
         counts: { total: 1, deduped: 1, verified: 0, grounded: 1, needsSme: 0 },
         confirmedQuestionIds: [],
+        confirmedBy: {},
         updatedAt: new Date().toISOString(),
       });
       expect(store.countOpenReviews()).toBe(3);

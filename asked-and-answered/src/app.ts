@@ -409,6 +409,7 @@ function putSession(session: ReviewSession): void {
     results: session.results,
     counts: session.recount(),
     confirmedQuestionIds: Array.from(session.confirmedQuestionIds),
+    confirmedBy: Object.fromEntries(session.confirmedBy),
     updatedAt: new Date().toISOString(),
   });
 }
