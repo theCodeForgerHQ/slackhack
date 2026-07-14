@@ -62,6 +62,7 @@
         "files:write",
         "search:read.public",
         "canvases:write",
+        "lists:write",
         "users:read",
         "im:history",
         "im:read",

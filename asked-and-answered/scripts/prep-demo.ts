@@ -8,7 +8,8 @@
  *   2. Creates private channel #compliance-private if missing.
  *   3. Seeds evidence messages needed for the v5 demo script beats.
  *   4. Generates demo-questionnaire.xlsx with 47 rows matching the video.
- *   5. Optionally invites the demo user to public channels only, so private
+ *   5. Generates demo-questionnaire-short.xlsx with 4 rows for fast recording.
+ *   6. Optionally invites the demo user to public channels only, so private
  *      evidence stays invisible and the ACL-redaction beat triggers.
  *
  * It does NOT create Slack users (requires SCIM/admin). Pass an existing user
@@ -118,6 +119,25 @@ const DEMO_QUESTIONS: Array<[string, string]> = [
   ['Personnel', 'Do employees complete security awareness training?'],
 ];
 
+const SHORT_QUESTIONS: Array<[string, string]> = [
+  ['Data Protection', 'Do you encrypt customer data at rest?'],
+  ['Access Control', 'Is multi-factor authentication enforced for all employees?'],
+  ['Insurance', 'Do you carry cyber liability insurance?'],
+  ['Data Protection', 'Where is production customer data hosted geographically?'],
+];
+
+async function writeQuestionnaire(questions: Array<[string, string]>, filename: string) {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Security Questionnaire');
+  ws.addRow(['#', 'Category', 'Question', 'Vendor Response']);
+  ws.getRow(1).font = { bold: true };
+  ws.columns = [{ width: 5 }, { width: 22 }, { width: 70 }, { width: 40 }];
+  questions.forEach(([cat, q], i) => ws.addRow([i + 1, cat, q, '']));
+  const buf = await wb.xlsx.writeBuffer();
+  writeFileSync(filename, Buffer.from(buf));
+  console.log(`Wrote ${filename} — ${questions.length} questions`);
+}
+
 console.log('=== Creating / verifying channels ===\n');
 const channelMap: Record<string, string> = {};
 for (const seed of SEEDS) {
@@ -142,17 +162,9 @@ for (const seed of SEEDS) {
   console.log(`  posted ${seed.messages.length} evidence messages`);
 }
 
-console.log('\n=== Generating demo questionnaire ===\n');
-const wb = new ExcelJS.Workbook();
-const ws = wb.addWorksheet('Security Questionnaire');
-ws.addRow(['#', 'Category', 'Question', 'Vendor Response']);
-ws.getRow(1).font = { bold: true };
-ws.columns = [{ width: 5 }, { width: 22 }, { width: 70 }, { width: 40 }];
-DEMO_QUESTIONS.forEach(([cat, q], i) => ws.addRow([i + 1, cat, q, '']));
-const buf = await wb.xlsx.writeBuffer();
-const out = 'demo-questionnaire.xlsx';
-writeFileSync(out, Buffer.from(buf));
-console.log(`Wrote ${out} — ${DEMO_QUESTIONS.length} questions`);
+console.log('\n=== Generating demo questionnaires ===\n');
+writeQuestionnaire(DEMO_QUESTIONS, 'demo-questionnaire.xlsx');
+writeQuestionnaire(SHORT_QUESTIONS, 'demo-questionnaire-short.xlsx');
 
 console.log('\n=== Channel memberships ===\n');
 for (const [name, id] of Object.entries(channelMap)) {
@@ -196,5 +208,6 @@ if (userArg) {
 console.log('\n=== Next steps ===');
 console.log('1. Ensure the demo user exists in the workspace (pass --user @username to auto-invite to public channels).');
 console.log('2. The demo user must NOT be in #compliance-private so the ACL-redaction beat triggers.');
-console.log('3. Open a DM with the Asked & Answered app as the demo user and upload demo-questionnaire.xlsx.');
-console.log('4. Verify: encrypt-at-rest -> Verified/Grounded, MFA -> Grounded, cyber-liability -> Needs SME, EU hosting -> Needs SME (ACL).');
+console.log('3. For recording, upload demo-questionnaire-short.xlsx (4 questions, ~30 seconds).');
+console.log('4. For full stress demo, upload demo-questionnaire.xlsx (47 questions, ~5 minutes due to RTS rate limits).');
+console.log('5. Verify: encrypt-at-rest -> Verified/Grounded, MFA -> Grounded, cyber-liability -> Needs SME, EU hosting -> Needs SME (ACL).');
