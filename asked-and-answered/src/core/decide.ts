@@ -1,6 +1,7 @@
 import type { Citation } from './library.js';
 import type { DomainEvent, AnswerApproved, AnswerConfirmed, AnswerEdited, AnswerProposed } from './events.js';
 import { canApplyTransition, type ActorType } from './stateMachine.js';
+import { DEFAULT_POLICY, type ApprovalPolicy, isFinalApproval } from './policy.js';
 
 export interface DraftResultLike {
   questionId: string;
@@ -12,7 +13,7 @@ export interface DraftResultLike {
 }
 
 export type Command =
-  | { type: 'Approve'; questionId: string; actor: string; actorType: ActorType; result: DraftResultLike; answerId?: number }
+  | { type: 'Approve'; questionId: string; actor: string; actorType: ActorType; result: DraftResultLike; answerId?: number; policy?: ApprovalPolicy }
   | { type: 'Confirm'; questionId: string; actor: string; actorType: ActorType; result: DraftResultLike; answerId?: number }
   | { type: 'Reject'; questionId: string; actor: string; actorType: ActorType; result: DraftResultLike }
   | { type: 'Edit'; questionId: string; actor: string; actorType: ActorType; newText: string; result: DraftResultLike; answerId?: number }
@@ -24,6 +25,8 @@ export interface DecideResult {
   ok: boolean;
   events?: DomainEvent[];
   error?: string;
+  /** For N-of-M policies: true only when enough distinct approvers have approved. */
+  finalApproval?: boolean;
 }
 
 function now(): string {
@@ -79,8 +82,9 @@ export function decide(events: DomainEvent[], command: Command): DecideResult {
   switch (command.type) {
     case 'Approve': {
       const { result, actor, actorType, questionId } = command;
+      const policy = command.policy ?? DEFAULT_POLICY;
       if (result.state === 'verified') {
-        return { ok: true, events: [] };
+        return { ok: true, events: [], finalApproval: true };
       }
       if (!result.answerText) {
         return { ok: false, error: 'cannot approve a draft with no answer text' };
@@ -95,8 +99,12 @@ export function decide(events: DomainEvent[], command: Command): DecideResult {
       if (confirm.actor === actor) {
         return { ok: false, error: 'approver must be a different human than the confirmer' };
       }
-      const previous = latestApproveEvent(events, result.questionText);
+      const previousApprovals = events.filter(
+        (e): e is AnswerApproved => e.type === 'AnswerApproved' && e.questionText === result.questionText,
+      );
+      const previous = previousApprovals.at(-1);
       const answerId = previous ? previous.answerId : command.answerId ?? Date.now();
+      const alreadyApprovedByActor = previousApprovals.some((e) => e.actor === actor);
       const transition = canApplyTransition(
         events,
         'AnswerApproved',
@@ -106,6 +114,12 @@ export function decide(events: DomainEvent[], command: Command): DecideResult {
         questionId,
       );
       if (!transition.ok) return { ok: false, error: transition.error };
+      const approvers = previousApprovals.map((e) => e.actor);
+      if (!alreadyApprovedByActor) approvers.push(actor);
+      const finalApproval = isFinalApproval(approvers, policy);
+      if (alreadyApprovedByActor) {
+        return { ok: true, events: [], finalApproval };
+      }
       const ev: AnswerApproved = {
         type: 'AnswerApproved',
         answerId,
@@ -116,7 +130,7 @@ export function decide(events: DomainEvent[], command: Command): DecideResult {
         actorType: 'human',
         ts: now(),
       };
-      return { ok: true, events: [ev] };
+      return { ok: true, events: [ev], finalApproval };
     }
 
     case 'Confirm': {

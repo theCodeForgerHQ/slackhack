@@ -31,7 +31,9 @@ export const ANSWER_LIFECYCLE: Transition[] = [
   { eventType: 'DraftProduced', from: ['draft'], to: 'draft', requiresHuman: false, requiresEvidence: false },
   { eventType: 'AnswerProposed', from: ['draft'], to: 'proposed', requiresHuman: false, requiresEvidence: false },
   { eventType: 'AnswerConfirmed', from: ['draft', 'proposed', 'edited'], to: 'confirmed', requiresHuman: true, requiresEvidence: false },
-  { eventType: 'AnswerApproved', from: ['confirmed'], to: 'approved', requiresHuman: true, requiresEvidence: true },
+  // N-of-M approval: additional distinct approvers may append AnswerApproved
+  // events after the first approval, so 'approved' is also a valid source.
+  { eventType: 'AnswerApproved', from: ['confirmed', 'approved'], to: 'approved', requiresHuman: true, requiresEvidence: true },
   { eventType: 'AnswerRejected', from: ['draft', 'proposed', 'confirmed', 'edited'], to: 'rejected', requiresHuman: true, requiresEvidence: false },
   { eventType: 'AnswerEdited', from: ['draft', 'proposed', 'confirmed', 'edited'], to: 'edited', requiresHuman: true, requiresEvidence: false },
 ];

@@ -7,6 +7,7 @@ import { DraftingPipeline, type DraftingLlm, type DraftResult } from '../core/pi
 import type { ParsedQuestionnaire } from '../core/types.js';
 import type { PlanCounts } from './blocks.js';
 import { decide } from '../core/decide.js';
+import { selectPolicy } from '../core/policy.js';
 
 export interface RunDeps {
   library: AnswerLibrary;
@@ -109,6 +110,7 @@ export class ReviewSession {
     if (!this.confirmedQuestionIds.has(questionId)) {
       throw new Error(`question ${questionId} must be confirmed by a human before it can be approved`);
     }
+    const policy = selectPolicy(r.questionText);
     this.deps.ledger.append({
       action: 'approve',
       actor,
@@ -122,23 +124,27 @@ export class ReviewSession {
       actor,
       actorType: 'human',
       result: r,
+      policy,
     });
     if (decision.ok) this.emitEvents(decision.events ?? []);
 
-    const citations = r.citations ?? [];
-    const saved = this.deps.library.saveApproved({
-      questionText: r.questionText,
-      answerText: r.answerText,
-      citations,
-      approvedBy: actor,
-      // No workspace evidence means the approver is the provenance — label
-      // it as testimony instead of passing it off as evidence-backed.
-      kind: citations.length > 0 ? 'evidence' : 'sme_testimony',
-    });
-    r.state = 'verified';
-    r.approvedBy = actor;
-    r.approvedAt = saved.approvedAt;
-    delete r.reason;
+    // N-of-M policy: only mark verified when enough distinct approvers have approved.
+    if (decision.ok && decision.finalApproval) {
+      const citations = r.citations ?? [];
+      const saved = this.deps.library.saveApproved({
+        questionText: r.questionText,
+        answerText: r.answerText,
+        citations,
+        approvedBy: actor,
+        // No workspace evidence means the approver is the provenance — label
+        // it as testimony instead of passing it off as evidence-backed.
+        kind: citations.length > 0 ? 'evidence' : 'sme_testimony',
+      });
+      r.state = 'verified';
+      r.approvedBy = actor;
+      r.approvedAt = saved.approvedAt;
+      delete r.reason;
+    }
     return r;
   }
 

@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { decide } from '../src/core/decide.js';
 import type { DraftResultLike } from '../src/core/decide.js';
+import { HIGH_SENSITIVITY_POLICY } from '../src/core/policy.js';
 
 function groundedResult(questionId: string, questionText: string, answerText: string): DraftResultLike {
   return {
@@ -44,6 +45,7 @@ describe('decide', () => {
     expect(result.ok).toBe(true);
     expect(result.events).toHaveLength(1);
     expect(result.events?.[0]?.type).toBe('AnswerApproved');
+    expect(result.finalApproval).toBe(true);
   });
 
   test('Approve without Confirm fails', () => {
@@ -199,5 +201,65 @@ describe('decide', () => {
       result: groundedResult('q1', 'Q', 'Yes.'),
     });
     expect(result.ok).toBe(false);
+  });
+
+  test('N-of-M: first approval is not final when policy requires two approvers', () => {
+    const confirmed = decide([], {
+      type: 'Confirm',
+      questionId: 'q1',
+      actor: 'U_SME',
+      actorType: 'human',
+      result: groundedResult('q1', 'Is the breach response classified?', 'Yes.'),
+    });
+    const first = decide(confirmed.events ?? [], {
+      type: 'Approve',
+      questionId: 'q1',
+      actor: 'U_REVIEWER1',
+      actorType: 'human',
+      result: groundedResult('q1', 'Is the breach response classified?', 'Yes.'),
+      policy: HIGH_SENSITIVITY_POLICY,
+    });
+    expect(first.ok).toBe(true);
+    expect(first.finalApproval).toBe(false);
+
+    const second = decide([...(confirmed.events ?? []), ...(first.events ?? [])], {
+      type: 'Approve',
+      questionId: 'q1',
+      actor: 'U_REVIEWER2',
+      actorType: 'human',
+      result: groundedResult('q1', 'Is the breach response classified?', 'Yes.'),
+      policy: HIGH_SENSITIVITY_POLICY,
+    });
+    expect(second.ok).toBe(true);
+    expect(second.finalApproval).toBe(true);
+  });
+
+  test('N-of-M: duplicate approver is idempotent and does not advance final count', () => {
+    const confirmed = decide([], {
+      type: 'Confirm',
+      questionId: 'q1',
+      actor: 'U_SME',
+      actorType: 'human',
+      result: groundedResult('q1', 'Is the breach response classified?', 'Yes.'),
+    });
+    const first = decide(confirmed.events ?? [], {
+      type: 'Approve',
+      questionId: 'q1',
+      actor: 'U_REVIEWER1',
+      actorType: 'human',
+      result: groundedResult('q1', 'Is the breach response classified?', 'Yes.'),
+      policy: HIGH_SENSITIVITY_POLICY,
+    });
+    const dup = decide([...(confirmed.events ?? []), ...(first.events ?? [])], {
+      type: 'Approve',
+      questionId: 'q1',
+      actor: 'U_REVIEWER1',
+      actorType: 'human',
+      result: groundedResult('q1', 'Is the breach response classified?', 'Yes.'),
+      policy: HIGH_SENSITIVITY_POLICY,
+    });
+    expect(dup.ok).toBe(true);
+    expect(dup.events).toHaveLength(0);
+    expect(dup.finalApproval).toBe(false);
   });
 });

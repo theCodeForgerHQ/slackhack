@@ -746,17 +746,25 @@ for (const [actionId, verb] of [
     const t = target(body);
     if (!resolved || !t) return;
     try {
-      if (verb === 'approve') resolved.session.approve(resolved.questionId, userId, resolved.session.runId);
-      else resolved.session.reject(resolved.questionId, userId, resolved.session.runId);
+      let text: string;
+      if (verb === 'approve') {
+        const resultBefore = resolved.session.results.find((r) => r.questionId === resolved.questionId);
+        resolved.session.approve(resolved.questionId, userId, resolved.session.runId);
+        const resultAfter = resolved.session.results.find((r) => r.questionId === resolved.questionId);
+        if (resultAfter?.state === 'verified') {
+          text = `:white_check_mark: Approved by <@${userId}> — saved to the answer library.\n${planSummaryText(resolved.session.recount())}`;
+        } else {
+          text = `:memo: Approved by <@${userId}> — this high-sensitivity answer needs one more distinct approver before it enters the library.\n${planSummaryText(resolved.session.recount())}`;
+        }
+      } else {
+        resolved.session.reject(resolved.questionId, userId, resolved.session.runId);
+        text = `:no_entry: Rejected by <@${userId}> — routed back to humans.\n${planSummaryText(resolved.session.recount())}`;
+      }
       putSession(resolved.session);
-      const counts = resolved.session.recount();
       await client.chat.postMessage({
         channel: t.channel,
         thread_ts: t.thread,
-        text:
-          verb === 'approve'
-            ? `:white_check_mark: Approved by <@${userId}> — saved to the answer library.\n${planSummaryText(counts)}`
-            : `:no_entry: Rejected by <@${userId}> — routed back to humans.\n${planSummaryText(counts)}`,
+        text,
       });
     } catch (err) {
       await client.chat.postMessage({
