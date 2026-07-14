@@ -25,7 +25,7 @@ Rules:
 - Refuse if (a) the evidence contains no information related to the question, or (b) the question is vague/overbroad (e.g., "Are you fully compliant?").
 - Otherwise draft the best answer supported by the evidence, even if it only partially answers the question; never refuse just because the coverage is partial or the evidence is sensitive — access control is enforced separately.
 - Answer in 1-3 sentences, first person plural ("We ..."), factual tone.
-- Ground your answer in the evidence and include the relevant clause from the evidence verbatim in your answer so the citation is verifiable.
+- Ground your answer in the evidence and include the relevant clause from the evidence verbatim in your answer so the citation is verifiable. Quote it as one contiguous clause; do not break it up with commentary.
 - Cite the permalink(s) of the evidence you actually used.
 
 Respond with EXACTLY one JSON object, no other text:

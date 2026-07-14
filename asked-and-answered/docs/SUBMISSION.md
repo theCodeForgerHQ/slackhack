@@ -51,7 +51,7 @@ TypeScript + Bolt. A small, sharp core:
 - **LedgerV2** — event-sourced, hash-chained approval lifecycle with live `verify`.
 - **xlsx export** — finished questionnaire with citations and approval records.
 
-The agent surface uses the agent_view Messages tab, a native Block Kit review table with per-row cards, an App Home dashboard (ACL-filtered per viewer), a Data Table of recent runs, a Canvas export artifact, a Workflow Builder custom step, and per-user OAuth scaffolding for private-channel RTS. 268 hermetic + live integration tests, CI, three Z3 proofs (including a code-level contract proof of the permission invariant), an offline smoke test of the whole loop, and a measured-impact harness.
+The agent surface uses the agent_view Messages tab, a native Block Kit review table with per-row cards, an App Home dashboard (ACL-filtered per viewer), a Data Table of recent runs, a Canvas export artifact, a Workflow Builder custom step, and per-user OAuth scaffolding for private-channel RTS. The production HTTP receiver mounts both `/slack/events` and `/slack/actions` so block-kit interactions and modal submissions reach the app. 268 hermetic + live integration tests, CI, three Z3 proofs (including a code-level contract proof of the permission invariant), an offline smoke test of the whole loop, and a measured-impact harness.
 
 ## Impact — quantified, with a path to real measurement
 

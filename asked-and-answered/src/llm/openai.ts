@@ -2,6 +2,11 @@ import type { DraftingLlm, LlmDraft } from '../core/pipeline.js';
 import type { RtsHit } from '../core/planner.js';
 import type { Question } from '../core/types.js';
 import { buildDraftPrompt, parseDraftReply } from './prompt.js';
+import { GroundingGate } from '../core/grounding.js';
+
+function isSelfGrounded(answerText: string, hits: RtsHit[], citedPermalinks: string[]): boolean {
+  return new GroundingGate().verify(answerText, hits, citedPermalinks).ok;
+}
 
 interface ChatCompletionResponse {
   choices?: Array<{
@@ -46,15 +51,25 @@ export class OpenAiDrafter implements DraftingLlm {
   }
 
   async draft(question: Question, hits: RtsHit[]): Promise<LlmDraft> {
-    const body = {
-      model: this.model,
-      max_completion_tokens: 2000,
-      messages: [{ role: 'user', content: buildDraftPrompt(question, hits) }],
-    };
+    const basePrompt = buildDraftPrompt(question, hits);
+    const strictPrompt =
+      basePrompt +
+      '\n\nCRITICAL: Your previous draft was rejected because it did not quote the evidence verbatim as one contiguous clause. ' +
+      'This time, copy the relevant clause from the evidence into the answer exactly as written (keep it intact and contiguous), ' +
+      'then answer the question around that quotation.';
 
     const maxRetries = 5;
     let attempt = 0;
+    let lastResult: LlmDraft | undefined;
+
     while (true) {
+      const useStrict = lastResult?.kind === 'answer' && !isSelfGrounded(lastResult.answerText, hits, lastResult.citedPermalinks);
+      const body = {
+        model: this.model,
+        max_completion_tokens: 2000,
+        messages: [{ role: 'user', content: useStrict ? strictPrompt : basePrompt }],
+      };
+
       const res = await fetch(this.url, {
         method: 'POST',
         headers: this.headers,
@@ -79,7 +94,22 @@ export class OpenAiDrafter implements DraftingLlm {
       if (rateLimitDelay > 0) {
         await new Promise((resolve) => setTimeout(resolve, rateLimitDelay));
       }
-      return parseDraftReply(text);
+
+      const result = parseDraftReply(text);
+      if (result.kind === 'answer' && lastResult?.kind === 'answer' && !useStrict) {
+        // First attempt was an ungrounded answer; we just did the strict retry. Return strict result.
+        return result;
+      }
+      if (result.kind === 'answer' && isSelfGrounded(result.answerText, hits, result.citedPermalinks)) {
+        return result;
+      }
+      if (result.kind !== 'answer' || lastResult !== undefined) {
+        // Refusal on first try, or second try already attempted.
+        return result;
+      }
+      // Ungrounded answer on first try: retry once with the strict prompt.
+      lastResult = result;
+      attempt = 0;
     }
   }
 }

@@ -31,6 +31,12 @@ export interface CalibrationArtifact {
   note?: string;
 }
 
+// Safety cap: regardless of the conformal quantile, we never accept a match
+// whose content-word Jaccard is below 0.4 (nonconformity above 0.6).
+// This prevents clearly different questions (e.g., "insurance" vs "encryption")
+// from being incorrectly reused just because they share stopwords.
+const MAX_NONCONFORMITY = 0.6;
+
 export class ConformalMatcher {
   private calibratedQuantile: number | null = null;
 
@@ -65,13 +71,15 @@ export class ConformalMatcher {
     const n = scores.length;
     const k = Math.ceil((n + 1) * (1 - this.alpha));
     const idx = Math.min(k, n) - 1;
-    this.calibratedQuantile = scores[Math.max(0, idx)] ?? 0;
+    // Apply the safety cap so the artifact reflects the threshold actually used.
+    this.calibratedQuantile = Math.min(scores[Math.max(0, idx)] ?? 0, MAX_NONCONFORMITY);
   }
 
   /** Returns the singleton match, or undefined if the prediction set is empty or ambiguous. */
   match(query: string, candidates: ApprovedAnswer[]): ApprovedAnswer | undefined {
     if (this.calibratedQuantile === null) return undefined;
-    const threshold = this.calibratedQuantile;
+    // Effective threshold is the tighter of the calibrated quantile and the safety cap.
+    const threshold = Math.min(this.calibratedQuantile, MAX_NONCONFORMITY);
 
     const predictionSet: Array<{ answer: ApprovedAnswer; score: number }> = [];
     for (const answer of candidates) {
@@ -101,6 +109,13 @@ export class ConformalMatcher {
   }
 }
 
+const STOPWORDS = new Set([
+  'do', 'does', 'did', 'you', 'your', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+  'have', 'has', 'had', 'a', 'an', 'the', 'at', 'in', 'on', 'to', 'of', 'for', 'with', 'by',
+  'from', 'and', 'or', 'not', 'no', 'all', 'any', 'every', 'each', 'this', 'that', 'these',
+  'those', 'it', 'its', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'there', 'their',
+]);
+
 function normalize(text: string): string {
   return text
     .toLowerCase()
@@ -110,7 +125,11 @@ function normalize(text: string): string {
 }
 
 function tokens(text: string): Set<string> {
-  return new Set(normalize(text).split(' ').filter((t) => t.length > 2));
+  return new Set(
+    normalize(text)
+      .split(' ')
+      .filter((t) => t.length > 2 && !STOPWORDS.has(t)),
+  );
 }
 
 function jaccard(a: Set<string>, b: Set<string>): number {

@@ -1,10 +1,10 @@
 {
-  "qHat": 0.9,
+  "qHat": 0.6,
   "alpha": 0.1,
-  "nCalibration": 16,
-  "nHoldout": 4,
-  "holdoutCoverage": 1,
-  "falsePositiveRate": 0.5,
-  "calibratedAt": "2026-07-13T20:17:39.509Z",
+  "nCalibration": 23,
+  "nHoldout": 6,
+  "holdoutCoverage": 0,
+  "falsePositiveRate": 0.2,
+  "calibratedAt": "2026-07-14T06:00:53.076Z",
   "note": "Split-conformal quantile for token-Jaccard nonconformity. Matcher falls back to legacy threshold if this artifact is invalid."
 }

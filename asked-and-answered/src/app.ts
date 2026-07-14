@@ -104,11 +104,12 @@ const defaultCapabilities: CapabilityMap = {
 };
 let capabilities: CapabilityMap = defaultCapabilities;
 
+const socketMode = Boolean(process.env.SLACK_APP_TOKEN);
 const app = new App({
   token: required('SLACK_BOT_TOKEN'),
   signingSecret: required('SLACK_SIGNING_SECRET'),
-  socketMode: process.env.SLACK_APP_TOKEN ? true : false,
-  ...(process.env.SLACK_APP_TOKEN ? { appToken: process.env.SLACK_APP_TOKEN } : {}),
+  socketMode,
+  ...(socketMode ? { appToken: process.env.SLACK_APP_TOKEN! } : { endpoints: ['/slack/events', '/slack/actions'] }),
   port: Number(process.env.PORT ?? 3000),
   customRoutes: [
     {
@@ -872,6 +873,7 @@ app.view('sme_answer_modal', async ({ ack, body, view }) => {
     const answer = view.state.values.answer_block?.answer_input?.value ?? '';
     if (!resolved || !answer.trim()) return;
     resolved.session.smeProvide(resolved.questionId, body.user.id, answer, resolved.session.runId);
+    putSession(resolved.session);
   } catch (err) {
     console.error('sme_answer_modal failed', err);
   }
@@ -884,6 +886,7 @@ app.view('edit_answer_modal', async ({ ack, body, view }) => {
     const answer = view.state.values.answer_block?.answer_input?.value ?? '';
     if (!resolved || !answer.trim()) return;
     resolved.session.edit(resolved.questionId, body.user.id, answer, resolved.session.runId);
+    putSession(resolved.session);
   } catch (err) {
     console.error('edit_answer_modal failed', err);
   }

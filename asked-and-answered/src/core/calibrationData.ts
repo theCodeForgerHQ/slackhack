@@ -24,12 +24,21 @@ export const DEFAULT_CALIBRATION_PAIRS: CalibrationPair[] = [
   { query: 'Is the incident response plan tested annually?', candidate: 'Do you test incident response annually?', same: true },
   { query: 'Do employees complete security awareness training?', candidate: 'Is security training required annually?', same: true },
 
-  // Different questions.
+  // Different questions — including hard negatives that share many tokens.
   { query: 'Do you encrypt customer data at rest?', candidate: 'Do you carry cyber liability insurance?', same: false },
+  { query: 'Do you encrypt customer data at rest?', candidate: 'Do you encrypt data in transit?', same: false },
+  { query: 'Is MFA enforced for all employees?', candidate: 'Is MFA enforced for all contractors?', same: false },
+  { query: 'Are backups tested at least quarterly?', candidate: 'Are backup restore drills run annually?', same: false },
+  { query: 'Do you have a SOC 2 Type II report?', candidate: 'Do you have a SOC 2 Type I report?', same: false },
+  { query: 'Where is production data hosted geographically?', candidate: 'Where is customer data hosted geographically?', same: false },
+  { query: 'Are access certifications reviewed quarterly?', candidate: 'Are access certifications reviewed annually?', same: false },
+  { query: 'Are administrative actions logged to a SIEM?', candidate: 'Are user actions logged to a SIEM?', same: false },
+  { query: 'Is the incident response plan tested annually?', candidate: 'Is the incident response plan documented annually?', same: false },
+  { query: 'Do employees complete security awareness training?', candidate: 'Do contractors complete security awareness training?', same: false },
   { query: 'Is MFA enforced?', candidate: 'Do you use FIPS 140-2 modules?', same: false },
   { query: 'Are backups tested quarterly?', candidate: 'Do you have a bug bounty program?', same: false },
   { query: 'Do you have a SOC 2 report?', candidate: 'What is your data retention policy?', same: false },
-  { query: 'Where is production data hosted?', candidate: 'Do you encrypt data in transit?', same: false },
+  { query: 'Where is production data hosted?', candidate: 'Do you encrypt customer data at rest?', same: false },
   { query: 'Are access certifications reviewed quarterly?', candidate: 'Do you use homomorphic encryption?', same: false },
   { query: 'Is there a business continuity plan?', candidate: 'Do you have a red-team program?', same: false },
   { query: 'Are mobile devices enrolled in MDM?', candidate: 'Do you have an AI ethics board?', same: false },
