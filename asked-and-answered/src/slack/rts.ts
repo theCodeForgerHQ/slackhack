@@ -64,67 +64,91 @@ export function parseRtsResponse(raw: unknown): RtsHit[] {
  *  This keeps the demo working in DMs or sandboxes where action tokens are not
  *  issued, while preserving the real RTS path wherever it is available.
  */
-async function historyFallback(
-  apiCall: SlackApiCall,
-  query: string,
-  limit: number,
-): Promise<RtsHit[]> {
-  const queryTerms = new Set(
-    query
+function tokenize(text: string): Set<string> {
+  return new Set(
+    text
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, ' ')
       .split(/\s+/)
       .filter((w) => w.length > 2),
   );
+}
+
+function overlap(a: Set<string>, b: Set<string>): number {
+  let n = 0;
+  for (const t of a) if (b.has(t)) n++;
+  return n;
+}
+
+async function scanConversations(
+  apiCall: SlackApiCall,
+  queryTerms: Set<string>,
+  limit: number,
+  channelIds: string[],
+): Promise<RtsHit[]> {
+  const hits: RtsHit[] = [];
+  for (const channelId of channelIds.slice(0, 10)) {
+    try {
+      const history = (await apiCall('conversations.history', {
+        channel: channelId,
+        limit: 100,
+      })) as { messages?: Array<{ text?: string; ts?: string; user?: string }> };
+      const messages = history.messages ?? [];
+      for (const msg of messages) {
+        const text = msg.text ?? '';
+        if (overlap(queryTerms, tokenize(text)) === 0) continue;
+        let permalink = '';
+        try {
+          const permalinkRes = (await apiCall('chat.getPermalink', {
+            channel: channelId,
+            message_ts: msg.ts,
+          })) as { permalink?: string };
+          permalink = permalinkRes.permalink ?? '';
+        } catch {
+          permalink = '';
+        }
+        if (!permalink) continue;
+        hits.push({ permalink, channelId, ts: msg.ts ?? '', snippet: text });
+        if (hits.length >= limit) return hits;
+      }
+    } catch {
+      // Ignore per-channel errors; keep scanning.
+    }
+  }
+  return hits;
+}
+
+async function historyFallback(
+  apiCall: SlackApiCall,
+  query: string,
+  limit: number,
+): Promise<RtsHit[]> {
+  const queryTerms = tokenize(query);
   if (queryTerms.size === 0) return [];
 
+  // 1) Public channels the bot has joined (requires channels:history).
   try {
     const list = (await apiCall('conversations.list', {
       types: 'public_channel',
       exclude_archived: true,
       limit: 100,
     })) as { channels?: Array<{ id: string; name?: string; is_member?: boolean }> };
-    const hits: RtsHit[] = [];
-    const channels = (list.channels ?? []).filter((ch) => ch.is_member);
-    for (const channel of channels.slice(0, 5)) {
-      try {
-        const history = (await apiCall('conversations.history', {
-          channel: channel.id,
-          limit: 100,
-        })) as { messages?: Array<{ text?: string; ts?: string; user?: string }> };
-        const messages = history.messages ?? [];
-        for (const msg of messages) {
-          const text = msg.text ?? '';
-          const textTerms = new Set(
-            text
-              .toLowerCase()
-              .replace(/[^a-z0-9\s]/g, ' ')
-              .split(/\s+/)
-              .filter((w) => w.length > 2),
-          );
-          let overlap = 0;
-          for (const t of queryTerms) if (textTerms.has(t)) overlap++;
-          if (overlap === 0) continue;
-          // Resolve a real permalink so exports and reviewers can open the citation.
-          let permalink = '';
-          try {
-            const permalinkRes = (await apiCall('chat.getPermalink', {
-              channel: channel.id,
-              message_ts: msg.ts,
-            })) as { permalink?: string };
-            permalink = permalinkRes.permalink ?? '';
-          } catch {
-            permalink = '';
-          }
-          if (!permalink) continue;
-          hits.push({ permalink, channelId: channel.id, ts: msg.ts ?? '', snippet: text });
-          if (hits.length >= limit) return hits;
-        }
-      } catch {
-        // Ignore per-channel errors; keep scanning other channels.
-      }
-    }
-    return hits;
+    const channels = (list.channels ?? []).filter((ch) => ch.is_member).map((ch) => ch.id);
+    const hits = await scanConversations(apiCall, queryTerms, limit, channels);
+    if (hits.length > 0) return hits;
+  } catch {
+    // Fall through to IM fallback.
+  }
+
+  // 2) IM fallback: works with the im:history scope that DM messaging already needs.
+  // This keeps sandboxes/demos alive when the admin has not granted channels:history yet.
+  try {
+    const list = (await apiCall('conversations.list', {
+      types: 'im',
+      limit: 100,
+    })) as { channels?: Array<{ id: string }> };
+    const ims = (list.channels ?? []).map((ch) => ch.id);
+    return await scanConversations(apiCall, queryTerms, limit, ims);
   } catch {
     return [];
   }

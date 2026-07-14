@@ -55,6 +55,7 @@
         "chat:write",
         "chat:write.public",
         "channels:read",
+        "channels:history",
         "channels:manage",
         "groups:read",
         "groups:write",
