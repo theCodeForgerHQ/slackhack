@@ -116,7 +116,7 @@ export async function gatherHomeStats(
 
 export function appHomeBlocks(
   stats: HomeDashboardStats,
-  opts: { invariantCheckUrl?: string | undefined; useDataTable?: boolean | undefined } = {},
+  opts: { invariantCheckUrl?: string | undefined; verifyLedgerUrl?: string | undefined; useDataTable?: boolean | undefined } = {},
 ): unknown[] {
   const blocks: unknown[] = [
     {
@@ -197,6 +197,16 @@ export function appHomeBlocks(
                 action_id: 'apphome_open_invariant',
                 text: { type: 'plain_text', text: 'Open invariant proof' },
                 url: opts.invariantCheckUrl,
+              },
+            ]
+          : []),
+        ...(opts.verifyLedgerUrl
+          ? [
+              {
+                type: 'button',
+                action_id: 'apphome_open_verify_ledger',
+                text: { type: 'plain_text', text: 'See the safety proof' },
+                url: opts.verifyLedgerUrl,
               },
             ]
           : []),

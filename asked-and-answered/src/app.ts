@@ -26,6 +26,7 @@ import { createCanvasOrFallback } from './slack/canvasCreate.js';
 import { exportToSlackList } from './slack/listsExport.js';
 import { registerWorkflowStep } from './slack/workflowStep.js';
 import { verifyPipelineCodeLevel } from '../scripts/verifyPipelineCodeLevel.js';
+import { verifyInvariantWithZ3 } from '../scripts/verifyInvariantZ3.js';
 import { runQuestionnaire, ReviewSession, type RunDeps } from './slack/flows.js';
 import { ActionTokenStore, SlackRtsClient } from './slack/rts.js';
 import { Watcher } from './core/watcher.js';
@@ -133,6 +134,33 @@ const app = new App({
         const result = await invariantHealthCheck();
         res.writeHead(result.status === 'pass' ? 200 : 500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(result));
+      },
+    },
+    {
+      path: '/verify-ledger',
+      method: ['GET'],
+      handler: async (_req, res) => {
+        const [v1, v2, invariant, abstractZ3, codeZ3] = await Promise.all([
+          ledger.verify(),
+          ledgerV2.verify(),
+          invariantHealthCheck(),
+          verifyInvariantWithZ3(),
+          verifyPipelineCodeLevel(),
+        ]);
+        const ok = v1.ok && v2.ok && invariant.status === 'pass' && abstractZ3.proved && codeZ3.proved;
+        res.writeHead(ok ? 200 : 500, { 'Content-Type': 'application/json' });
+        res.end(
+          JSON.stringify({
+            status: ok ? 'ok' : 'failed',
+            ledger: { version: 'legacy', ok: v1.ok, entriesChecked: v1.entriesChecked, firstBadSeq: v1.firstBadSeq },
+            ledgerV2: { version: 'event-sourced', ok: v2.ok, entriesChecked: v2.entriesChecked, firstBadSeq: v2.firstBadSeq, metadataMismatch: v2.metadataMismatch },
+            invariant: { ok: invariant.status === 'pass', casesRun: invariant.casesRun, detail: invariant.detail },
+            proofs: {
+              abstractZ3: { proved: abstractZ3.proved, status: abstractZ3.status, detail: abstractZ3.detail },
+              codeLevelZ3: { proved: codeZ3.proved, status: codeZ3.status, detail: codeZ3.detail },
+            },
+          }),
+        );
       },
     },
     {
@@ -462,9 +490,10 @@ app.event('app_home_opened', async ({ event, client }) => {
     const stats = await gatherHomeStats(library, ledgerV2, userId, deps.visibility, sessionStore.countOpenReviews());
     const invariant = await invariantHealthCheck();
     stats.invariantOk = invariant.status === 'pass';
-    const homeOpts: { invariantCheckUrl?: string; useDataTable?: boolean } = { useDataTable: capabilities.dataTable };
+    const homeOpts: { invariantCheckUrl?: string; verifyLedgerUrl?: string; useDataTable?: boolean } = { useDataTable: capabilities.dataTable };
     if (process.env.AA_PUBLIC_URL) {
       homeOpts.invariantCheckUrl = `${process.env.AA_PUBLIC_URL}/invariant`;
+      homeOpts.verifyLedgerUrl = `${process.env.AA_PUBLIC_URL}/verify-ledger`;
     }
     try {
       await client.views.publish({
@@ -1136,9 +1165,10 @@ app.action('apphome_return_home', async ({ ack, body, client }) => {
   const stats = await gatherHomeStats(library, ledgerV2, userId, deps.visibility, sessionStore.countOpenReviews());
   const invariant = await invariantHealthCheck();
   stats.invariantOk = invariant.status === 'pass';
-  const homeOpts: { invariantCheckUrl?: string; useDataTable?: boolean } = { useDataTable: capabilities.dataTable };
+  const homeOpts: { invariantCheckUrl?: string; verifyLedgerUrl?: string; useDataTable?: boolean } = { useDataTable: capabilities.dataTable };
   if (process.env.AA_PUBLIC_URL) {
     homeOpts.invariantCheckUrl = `${process.env.AA_PUBLIC_URL}/invariant`;
+    homeOpts.verifyLedgerUrl = `${process.env.AA_PUBLIC_URL}/verify-ledger`;
   }
   try {
     await client.views.publish({
