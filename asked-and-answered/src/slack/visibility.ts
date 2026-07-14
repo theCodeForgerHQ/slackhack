@@ -16,6 +16,11 @@ export class ChannelMembershipChecker implements VisibilityChecker {
   constructor(private readonly membersLookup: MembersLookup) {}
 
   async canSee(userId: string, citation: Citation): Promise<boolean> {
+    // IM channels are private to exactly the two participants; the requester
+    // is always a member of their own DM. Skip the network call, which can be
+    // slow or flaky for IMs in large sandboxes.
+    if (citation.channelId.startsWith('D')) return true;
+
     let members = this.cache.get(citation.channelId);
     if (members === undefined) {
       try {
