@@ -349,6 +349,11 @@ const app = new App({
       method: ['GET'],
       handler: (_req, res) => servePublicFile(res, 'public/safety-report.html'),
     },
+    {
+      path: '/safety-report/proof',
+      method: ['GET'],
+      handler: (_req, res) => servePublicFile(res, 'public/safety-report-proof.html'),
+    },
   ],
 });
 

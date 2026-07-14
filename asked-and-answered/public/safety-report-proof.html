@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Asked &amp; Answered — Safety Proof</title>
+    <style>
+      :root {
+        --bg: #0b0d14;
+        --surface: #12151f;
+        --text: #e8eaf0;
+        --muted: #9aa2b2;
+        --accent-2: #3bd0ee;
+        --success: #5ee4a0;
+        --border: #252a3a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 48px 56px;
+        text-align: center;
+        max-width: 420px;
+        width: 100%;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      }
+      .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(94, 228, 160, 0.12);
+        color: var(--success);
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+      }
+      h1 {
+        font-size: 1.6rem;
+        margin: 0 0 12px;
+        line-height: 1.25;
+      }
+      .metric {
+        font-size: 4rem;
+        font-weight: 800;
+        margin: 24px 0;
+        color: var(--success);
+      }
+      .proof {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.9rem;
+        color: var(--accent-2);
+        margin-bottom: 24px;
+      }
+      p { color: var(--muted); margin: 0 0 20px; font-size: 1rem; }
+      a { color: var(--accent-2); text-decoration: none; font-weight: 600; }
+      a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <article class="card">
+      <div class="badge">Z3 theorem prover</div>
+      <h1>Permission invariant</h1>
+      <div class="metric">PROVED</div>
+      <div class="proof">unsat — invariant entailed</div>
+      <p>No answer text ever flows to a requester who cannot see all of its evidence.</p>
+      <a href="/safety-report">See full safety report →</a>
+    </article>
+  </body>
+</html>

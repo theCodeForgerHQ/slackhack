@@ -223,13 +223,13 @@
 "When her CISO asks how she knows it's safe, Alice shows him one number."
 
 **ON SCREEN:**  
-- Alice clicks **Safety report**. Browser opens to `/safety-report`.
+- Alice clicks **Safety report**. Browser opens to `/safety-report/proof`.
 - One metric card animates in: **Z3 proof: PROVED**.
 - CISO's Slack reaction: ✅
 
 **ACTION:**  
 1. Cursor clicks **Safety report** link.  
-2. Browser opens. Single green card: **Z3 proof: PROVED**.  
+2. Browser opens. Single green card: **Permission invariant — PROVED**.  
 3. Cut back to Alice.
 
 **XYZ FRAMING overlay:**  
