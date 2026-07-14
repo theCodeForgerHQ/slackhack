@@ -36,6 +36,35 @@ const STOPWORDS = new Set(
 const MAX_KEYWORDS = 8;
 const OR_BATCH_SIZE = 5;
 
+/** Conservative synonym expansion for keyword-only RTS. */
+const EXPANSIONS: Record<string, string[]> = {
+  encrypt: ['encrypt', 'encryption', 'encrypted', 'cryptographic'],
+  backup: ['backup', 'backups', 'disaster recovery'],
+  password: ['password', 'passwords', 'credentials', 'credential'],
+  mfa: ['mfa', 'multifactor', '2fa', 'two-factor'],
+  audit: ['audit', 'audits', 'auditing', 'auditor'],
+  access: ['access', 'authorization', 'authentication', 'permissions'],
+  policy: ['policy', 'policies', 'procedure', 'procedures'],
+  network: ['network', 'firewall', 'vpn', 'segmentation'],
+  logging: ['logging', 'logs', 'log', 'monitoring'],
+  vulnerability: ['vulnerability', 'vulnerabilities', 'patch', 'patching'],
+  penetration: ['penetration', 'pentest', 'penetration test', 'penetration testing'],
+};
+
+function expandTerm(term: string): string[] {
+  return EXPANSIONS[term] ?? [term];
+}
+
+function orGroup(terms: string[]): string {
+  const unique = [...new Set(terms)];
+  if (unique.length === 1) return unique[0]!;
+  // Keep the group as a single searchable token by parenthesizing it.
+  // RTS keyword mode treats parentheses as grouping; the implementation
+  // intentionally stays within the MAX_KEYWORDS concept budget because a
+  // group counts as one salient concept even if it spans several words.
+  return `(${unique.join(' OR ')})`;
+}
+
 /**
  * Sliding-window rate budget. RTS allows ~10 requests/min per user and
  * pagination counts, so every call goes through this gate.
@@ -69,8 +98,10 @@ export class RateBudget {
   }
 }
 
-/** Salient-keyword query: RTS keyword mode has no synonym help, so keep terms literal. */
-export function buildSearchQuery(questionText: string): string {
+/** Salient-keyword query: RTS keyword mode has no synonym help, so keep terms literal.
+ *  When `expand` is true, map known compliance terms to short synonym groups.
+ */
+export function buildSearchQuery(questionText: string, opts?: { expand?: boolean }): string {
   const words = questionText
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, ' ')
@@ -78,7 +109,9 @@ export function buildSearchQuery(questionText: string): string {
     .filter((w) => w.length > 1 && !STOPWORDS.has(w));
   const unique: string[] = [];
   for (const w of words) if (!unique.includes(w)) unique.push(w);
-  return unique.slice(0, MAX_KEYWORDS).join(' ');
+  const terms = unique.slice(0, MAX_KEYWORDS);
+  if (!opts?.expand) return terms.join(' ');
+  return terms.map((t) => orGroup(expandTerm(t))).join(' ');
 }
 
 function tokenSet(text: string): Set<string> {
@@ -268,7 +301,21 @@ export class QueryPlanner {
       const params: RtsSearchParams = { query };
       if (options.limit !== undefined) params.limit = options.limit;
       try {
-        const { hits } = await this.rts.searchContext(params);
+        let { hits } = await this.rts.searchContext(params);
+        // Absorbed from Tribal Knowledge Agent: keyword-only RTS sandboxes
+        // often miss evidence written with a synonym (e.g. "encrypt" vs
+        // "encryption"). If the literal query returns nothing, retry once
+        // with a conservative synonym expansion. This preserves precision
+        // for well-covered queries and improves recall for sparse ones.
+        if (hits.length === 0) {
+          const expanded = buildSearchQuery(question.text, { expand: true });
+          if (expanded !== query) {
+            await this.gate();
+            const expandedParams: RtsSearchParams = { query: expanded };
+            if (options.limit !== undefined) expandedParams.limit = options.limit;
+            ({ hits } = await this.rts.searchContext(expandedParams));
+          }
+        }
         out.set(question.id, { questionId: question.id, hits, searchFailed: false });
       } catch {
         out.set(question.id, { questionId: question.id, hits: [], searchFailed: true });

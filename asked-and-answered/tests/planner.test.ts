@@ -65,6 +65,49 @@ describe('buildSearchQuery', () => {
     const query = buildSearchQuery(long);
     expect(query.split(' ').length).toBeLessThanOrEqual(8);
   });
+
+  test('expand mode groups known compliance terms with OR synonyms', () => {
+    const query = buildSearchQuery('Do you encrypt customer data at rest?', { expand: true });
+    expect(query).toMatch(/\bencrypt\b/);
+    expect(query).toMatch(/\bencryption\b/);
+    expect(query).toContain('OR');
+  });
+});
+
+describe('QueryPlanner — synonym expansion fallback', () => {
+  test('retries with expanded query when literal query returns zero hits', async () => {
+    let call = 0;
+    const { client, calls } = fakeRts((params) => {
+      call++;
+      if (params.query.includes('encryption') || params.query.includes('encrypted')) {
+        return [{ permalink: 'https://s.example/enc', channelId: 'C1', ts: '1.0', snippet: 'encryption at rest' }];
+      }
+      return []; // literal "encrypt" returns nothing
+    });
+    const planner = new QueryPlanner(client, {
+      budget: new RateBudget({ maxPerWindow: 100, windowMs: 60_000, now: () => 0 }),
+      sleep: async () => {},
+    });
+
+    const result = await planner.retrieve([q('q1', 'Do you encrypt data at rest?')], { strategy: 'per-question' });
+
+    expect(calls).toHaveLength(2);
+    expect(result.get('q1')?.hits).toHaveLength(1);
+    expect(result.get('q1')?.hits[0]?.permalink).toBe('https://s.example/enc');
+  });
+
+  test('does not retry expansion when literal query already returns hits', async () => {
+    const { client, calls } = fakeRts(() => [
+      { permalink: 'https://s.example/ok', channelId: 'C1', ts: '1.0', snippet: 'ok' },
+    ]);
+    const planner = new QueryPlanner(client, {
+      budget: new RateBudget({ maxPerWindow: 100, windowMs: 60_000, now: () => 0 }),
+      sleep: async () => {},
+    });
+
+    await planner.retrieve([q('q1', 'Do you encrypt data at rest?')], { strategy: 'per-question' });
+    expect(calls).toHaveLength(1);
+  });
 });
 
 describe('QueryPlanner — per-question strategy (primary)', () => {

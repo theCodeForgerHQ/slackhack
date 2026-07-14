@@ -80,7 +80,7 @@ This verified that the conformal matcher fix eliminated the false-positive cross
 
 ### 1.7 Full automated test suite
 - `npm run typecheck` — clean
-- `npm test` — 281/281 passed
+- `npm test` — 284/284 passed
 
 ---
 
@@ -109,6 +109,11 @@ This verified that the conformal matcher fix eliminated the false-positive cross
 - `buildCanvasDocument` now supports `decisionLog: true`, surfacing approved answers in a dedicated section with approver signatures.
 - Both auto-export and manual Canvas export use decision-log branding.
 - Verified by `tests/canvasExport.test.ts`.
+
+### Keyword-variant query expansion for RTS
+- Absorbed from [tribal-knowledge-agent](https://github.com/divergent99/tribal-knowledge-agent): `src/core/planner.ts` now expands known compliance terms (e.g. `encrypt` → `encrypt OR encryption OR encrypted`) and retries when the literal query returns zero hits.
+- This improves recall in keyword-only RTS sandboxes without changing behavior when the literal query already finds evidence.
+- Verified by `tests/planner.test.ts`.
 
 ---
 
@@ -199,7 +204,7 @@ The Azure App Service `asked-and-answered-app` in `rg-asked-and-answered` does n
 | Synthetic Slack events/actions against Render | PASS |
 | End-to-end compounding, no false positives | PASS |
 | `npm run typecheck` | PASS |
-| `npm test` (281) | PASS |
+| `npm test` (284) | PASS |
 | `npm run smoke` | PASS |
 | Deterministic eval 136/136 | PASS |
 | Azure real-LLM eval 136/136 | PASS |
