@@ -2,7 +2,7 @@ import type { AnswerLibrary, Citation, VisibilityChecker } from './library.js';
 import { GroundingGate } from './grounding.js';
 import type { QuestionEvidence, RtsHit } from './planner.js';
 import type { Question } from './types.js';
-import { sanitizeHits } from './sanitize.js';
+import { sanitizeHits, sanitizeQuestion } from './sanitize.js';
 import { detectDrift } from './driftResolver.js';
 
 export type LlmDraft =
@@ -128,9 +128,10 @@ export class DraftingPipeline {
     // Sanitize model inputs: NFKC + strip zero-width/directional chars. The
     // original citations remain untouched; this only hardens the prompt.
     const sanitizedHits = sanitizeHits(evidence.hits);
+    const sanitizedQuestion = { ...question, text: sanitizeQuestion(question.text) };
     let draft: LlmDraft;
     try {
-      draft = await this.llm.draft(question, sanitizedHits);
+      draft = await this.llm.draft(sanitizedQuestion, sanitizedHits);
     } catch {
       return { ...base, state: 'needs_sme', reason: 'llm_error' };
     }

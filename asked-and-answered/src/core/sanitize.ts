@@ -8,6 +8,9 @@
  *    the evidence context and be interpreted as instructions.
  * 3. A short allowlist removes zero-width and directional characters that are
  *    invisible to reviewers but visible to LLM tokenizers.
+ * 4. Both opening and closing evidence delimiter sequences are escaped so a
+ *    poison snippet cannot fake the end of one evidence block or the start of
+ *    another.
  */
 
 /** Characters we strip entirely: zero-width joiners, directional marks, etc. */
@@ -25,9 +28,19 @@ export function sanitizeEvidenceSnippet(snippet: string): string {
       .replace(STRIP_REGEX, '')
       // NFKC normalization: collapses homoglyphs, fullwidth, etc.
       .normalize('NFKC')
-      // Remove any attempts to close the evidence delimiter early.
-      .replace(/<\/evidence>/gi, '\\u003C/evidence\\u003E')
+      // Escape any evidence delimiter-like tag so poison cannot break out.
+      .replace(/<\/?evidence\b[^>]*>/gi, '[escaped-evidence-tag]')
   );
+}
+
+/**
+ * Normalize user-facing question text before it reaches the drafting LLM.
+ * This is defense-in-depth: the question is not wrapped in delimiters, but
+ * normalizing it prevents homoglyph and zero-width attacks from reaching the
+ * model unchanged.
+ */
+export function sanitizeQuestion(text: string): string {
+  return text.replace(STRIP_REGEX, '').normalize('NFKC');
 }
 
 /**
